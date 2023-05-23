@@ -1,16 +1,12 @@
 import requests
 import xml.etree.ElementTree as ET
 import tkinter
-'''
-https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic?serviceKey=Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH%2FSYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8%2BSgQ%3D%3D&pageNo=1&numOfRows=10
-'''
 url = 'https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic'
 service_key = "Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH/SYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8+SgQ=="
 queryParams = {'serviceKey': service_key, 'upkind':'417000', 'pageNo': '1', 'numOfRows': '20'}
 response = requests.get(url, params=queryParams)
 print(response.url)
 root = ET.fromstring(response.text)
-
 window = tkinter.Tk()
 window.title("뭐시기")
 
