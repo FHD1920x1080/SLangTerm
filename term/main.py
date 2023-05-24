@@ -1,0 +1,3 @@
+from tkWindow import*
+
+TkWindow()

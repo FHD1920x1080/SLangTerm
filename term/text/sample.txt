@@ -1,9 +1,26 @@
-sample url
+#sample url
 https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic?serviceKey=Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH%2FSYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8%2BSgQ%3D%3D&pageNo=1&numOfRows=10
 
-sample xml_data
+#요청변수
+유기날짜(검색 시작일)	bgnde		 	유기날짜(검색 시작일)(YYYYMMDD)
+유기날짜(검색 종료일)	endde		 	유기날짜(검색 종료일)(YYYYMMDD)
+축종코드	            upkind		 	축종코드- 개 : 417000 - 고양이 : 422400 - 기타 : 429900
+품종코드	            kind		 	품종코드(품종 조회 OPEN API 참조)
+시도코드	            upr_cd		 	시도코드(시도 조회 OPEN API 참조)
+시군구코드	            org_cd		 	시군구코드(시군구 조회 OPENAPI 참조)
+보호소번호	            care_reg_no		보호소번호(보호소 조회 OPEN API 참조)
+상태	                state			상태 - 전체 : null(빈값) - 공고중 : notice - 보호중 : protect
+중성화여부	            neuter_yn		상태 - 전체 : null(빈값) - 예 : Y - 아니오 : N - 미상 : U
+페이지 번호	            pageNo			페이지 번호 기본값 : 1
+페이지당 보여줄 개수	numOfRows		페이지당 보여줄 개수(1,000 이하)기본값 : 10
+응답형태	            _type			xml(기본값) 또는 json
+# 성별이 없는것은 아쉽네요
+# 카테고리 나누리고 다룰것은 검색 시작일(엔트리), 검색 종료일(엔트리), 시도코드(지역이름의 메뉴버튼), 축종코드(라디오버튼), 상태(라디오버튼)
+# 시작일 종료일은 일단 엔트리를 쓰는데, 메뉴버튼이나 달력처럼 만들 수 있으면 좋겠네요.
+
+#sample xml
 <desertionNo>469569202300370</desertionNo>
-<filename>http://www.animal.go.kr/files/shelter/2023/05/202305232105482_s.jpg</filename> # 미리보기
+<filename>http://www.animal.go.kr/files/shelter/2023/05/202305232105482_s.jpg</filename>
 <happenDt>20230523</happenDt>
 <happenPlace>새롬동 새롬북로13 </happenPlace>
 <kindCd>[고양이] 한국 고양이</kindCd>
@@ -13,7 +30,7 @@ sample xml_data
 <noticeNo>세종-세종-2023-00188</noticeNo>
 <noticeSdt>20230523</noticeSdt>
 <noticeEdt>20230602</noticeEdt>
-<popfile>http://www.animal.go.kr/files/shelter/2023/05/202305232105482.jpg</popfile> # 큰사진
+<popfile>http://www.animal.go.kr/files/shelter/2023/05/202305232105482.jpg</popfile>
 <processState>보호중</processState>
 <sexCd>M</sexCd>
 <neuterYn>U</neuterYn>
