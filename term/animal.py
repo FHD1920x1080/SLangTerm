@@ -33,7 +33,7 @@ class Animal:
     def __init__(self):
         pass
 
-    def setData(self, item):
+    def setMember(self, item):
         self.kindCd = item.findtext("kindCd")
         self.age = item.findtext("age")
         self.careNm = item.findtext("careNm")

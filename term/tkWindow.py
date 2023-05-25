@@ -15,6 +15,8 @@ class TkWindow:
 
         self.animalLabelList = []
         self.animalList = []
+        self.totalCount = 0 # len(self.animalList)과는 다름, 페이지와 상관없이 검색한 전체 개수
+        self.lastPage = 1
 
         self.categoryFrame = Frame(self.window)
         self.categoryFrame.pack()
@@ -55,21 +57,23 @@ class TkWindow:
 
     def setRoot(self):
         self.rqValue.set()
-
-        self.response = self.rqValue.get()
+        self.response = self.rqValue.getValue()
+        print(self.response.url)
         if self.response.status_code == 200: # 성공했을때
             self.root = ET.fromstring(self.response.text)
+            for item in self.root.iter("body"): # 하나가지고 for문 쓰는데 어떻게 값을 꺼내오지
+                self.totalCount = int(item.findtext("totalCount"))
+                self.lastPage = (self.totalCount + self.rqValue.numOfRows - 1) // self.rqValue.numOfRows
             return True
-        return False
+        return False # 실패
     def SetAnimalList(self):
         if not self.setRoot():
             print("읽는데 실패함")
             return
-        print("성공")
         self.animalList.clear()
         for item in self.root.iter("item"):
             animal = Animal()
-            animal.setData(item)
+            animal.setMember(item)
             self.animalList.append(animal)
 
     def printAnimalList(self):
@@ -89,8 +93,14 @@ class TkWindow:
             row_count += 1
 
     def prevPage(self):
-        self.rqValue.pageNo = max(1, self.rqValue.pageNo-1)
+        if self.rqValue.pageNo <= 1:
+            print("첫 페이지 입니다.")
+            return
+        self.rqValue.pageNo -= 1
         self.printAnimalList()
     def nextPage(self):
+        if self.rqValue.pageNo >= self.lastPage:
+            print("마지막 페이지 입니다.")
+            return
         self.rqValue.pageNo += 1
         self.printAnimalList()
