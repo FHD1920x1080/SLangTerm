@@ -1,10 +1,10 @@
 from tkinter import StringVar
 import requests
-url = 'https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic'
+url = 'http://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic'
 service_key = "Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH/SYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8+SgQ=="
-class ReQuestValue:
-    def __init__(self):
-        self.numOfRows = 10
+class RequestValue:
+    def __init__(self, numOfPage):
+        self.numOfRows = 10 * numOfPage
         self.pageNo = 1
         self.queryParams = {'serviceKey': service_key, 'numOfRows': str(self.numOfRows), 'pageNo':str(self.pageNo)}
 
