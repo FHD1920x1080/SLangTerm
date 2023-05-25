@@ -49,7 +49,9 @@ class TkWindow:
         self.pageFrame = Frame(self.window)
         self.pageFrame.pack()
         Button(self.pageFrame, text='이전', command=self.prevPage).grid(row=0, column=0)
-        Button(self.pageFrame, text='다음', command=self.nextPage).grid(row=0, column=1)
+        self.pageLabel = Label(self.pageFrame, text='1', font=("Helvetica", 10), width=8)
+        self.pageLabel.grid(row=0, column=1)
+        Button(self.pageFrame, text='다음', command=self.nextPage).grid(row=0, column=2)
 
 
         self.printAnimalList()
@@ -64,6 +66,7 @@ class TkWindow:
             for item in self.root.iter("body"): # 하나가지고 for문 쓰는데 어떻게 값을 꺼내오지
                 self.totalCount = int(item.findtext("totalCount"))
                 self.lastPage = (self.totalCount + self.rqValue.numOfRows - 1) // self.rqValue.numOfRows
+                self.pageLabel['text'] = str(self.rqValue.pageNo)
             return True
         return False # 실패
     def SetAnimalList(self):
