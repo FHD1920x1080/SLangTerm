@@ -1,7 +1,6 @@
 import xml.etree.ElementTree as ET
 from tkinter import font
-from animal import *
-from myLabel import *
+from customLabel import *
 from requestValue import *
 from utils import *
 
@@ -16,10 +15,10 @@ class TkWindow:
         scaling_factor = get_windows_text_scaling()#윈도우 텍스트 배율 받아옴
         font1 = font.Font(size=int(12.0/scaling_factor), family='Helvetica')
 
-        self.animalLabelList = []
-        self.animalList = []
-        self.totalCount = 0 # len(self.animalList)과는 다름, 페이지와 상관없이 검색한 전체 개수
-        self.numOfPage = 10 # 한페이지에 표시할 수
+        self.ListViewLabels = []
+        self.animals = []
+        self.totalCount = 0 # len(self.animals)과는 다름, 페이지와 상관없이 검색한 전체 개수
+        self.numOfPage = 16 # 한페이지에 표시할 수
         self.curPage = 1
         self.lastPage = 1
         self.rqValue = RequestValue(self.numOfPage) # 페이지의 10배만큼 읽음. 100개
@@ -63,10 +62,7 @@ class TkWindow:
 
         for i in range(self.numOfPage):
             label = Label(self.mainFrame, font=font1, text='', height=1)
-            label.grid(row=i, column=0)
-            # 라벨이랑 그리드를 조합하면 왼쪽 정렬이 안되고 중앙정렬이라서 크기가 다르면 들쭐날쭉하게 나옴
-            # 지금 출력 방식은 못생기게 나오니까 라벨을 관리하고 안에 각 요소들을 배치하는 클래스를 만들어 쓰든가 해야할듯
-            self.animalLabelList.append(label)
+            self.ListViewLabels.append(ListViewLabel(self.mainFrame, font1, i, 0))
 
         #self.setAndPrint() 이걸 하면 초기에 값이 나오는데 프로그램 실행이 느려짐
         self.window.mainloop()
@@ -83,18 +79,16 @@ class TkWindow:
             return True
         return False # 실패
 
-    def setAnimalList(self):
+    def setanimals(self):
         if not self.setRoot():
             print("읽는데 실패함")
             return
-        self.animalList.clear()
+        self.animals.clear()
         for item in self.root.iter("item"):
-            animal = Animal()
-            animal.setMember(item)
-            self.animalList.append(animal)
+            self.animals.append(Animal(item))
 
     def setAndPrint(self):
-        self.setAnimalList()
+        self.setanimals()
         self.curPage = 1
         self.pageLabel['text'] = str(self.curPage)
         self.prevButton['state'] = 'normal'
@@ -107,16 +101,14 @@ class TkWindow:
 
     def printListView(self):
         i = 0 # 라벨 인덱스
-        curPageFirstIndex = (self.curPage - 1)%self.numOfPage * self.numOfPage
-        curPageCount = min(self.numOfPage, len(self.animalList)-curPageFirstIndex)
-        print(curPageFirstIndex,curPageCount)
-        #현재 페이지에 표시될 수
+        curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
+        curPageCount = min(self.numOfPage, len(self.animals)-curPageFirstIndex)
+        #print(curPageFirstIndex, curPageCount, len(self.animals))
         while i < curPageCount:
-            self.animalLabelList[i]['text'] = self.animalList[curPageFirstIndex + i].getSimpleData()
+            self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i].getSimpleData())
             i += 1
-        animalLabelCount = len(self.animalLabelList)
-        while i < animalLabelCount: # 페이지의 라벨 수보다 동물이 적으면 공백
-            self.animalLabelList[i]['text'] = ''
+        while i < self.numOfPage: # 페이지의 라벨 수보다 동물이 적으면 공백
+            self.ListViewLabels[i].setContent('')
             i += 1
 
     def prevPage(self):
@@ -126,7 +118,7 @@ class TkWindow:
         self.curPage -= 1
         if self.curPage % 10 == 0: # 11->10, 21->20, 31->30
             self.rqValue.pageNo -= 1
-            self.setAnimalList()
+            self.setanimals()
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
     def nextPage(self):
@@ -136,6 +128,6 @@ class TkWindow:
         self.curPage += 1
         if self.curPage % 10 == 1: # 10->11, 20->21, 30->31
             self.rqValue.pageNo += 1
-            self.setAnimalList()
+            self.setanimals()
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()

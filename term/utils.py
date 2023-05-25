@@ -1,3 +1,4 @@
+#잡스러운 함수들 모아두는 파일
 import ctypes
 def get_windows_text_scaling():
     user32 = ctypes.windll.user32
