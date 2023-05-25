@@ -1,0 +1,109 @@
+import requests
+import xml.etree.ElementTree as ET
+from tkinter import *
+from animal import *
+from requestValue import *
+
+width = 1280
+height = 720
+
+class TkWindow:
+    def __init__(self):
+        self.window = Tk()
+        self.window.geometry(str(width) + "x" + str(height))
+        self.window.title("타이틀이름")
+
+        self.animalLabelList = []
+        self.animalList = []
+        self.totalCount = 0 # len(self.animalList)과는 다름, 페이지와 상관없이 검색한 전체 개수
+        self.lastPage = 1
+
+        self.categoryFrame = Frame(self.window)
+        self.categoryFrame.pack()
+
+        self.rqValue = ReQuestValue()
+        row_count = 0
+        Label(self.categoryFrame, text='검색 시작일', font=("Helvetica", 10), width=10).grid(row=row_count, column=0)
+        Entry(self.categoryFrame, textvariable=self.rqValue.bgnde, justify=RIGHT, width=10).grid(row=row_count, column=1)
+        Label(self.categoryFrame, text='검색 종료일', font=("Helvetica", 10), width=10).grid(row=row_count, column=2)
+        Entry(self.categoryFrame, textvariable=self.rqValue.endde, justify=RIGHT, width=10).grid(row=row_count, column=3)
+        row_count += 1
+
+        Radiobutton(self.categoryFrame, text='전체', variable=self.rqValue.upkind, value='0').grid(row=row_count, column=0)
+        Radiobutton(self.categoryFrame, text='개', variable=self.rqValue.upkind, value='417000').grid(row=row_count, column=1)
+        Radiobutton(self.categoryFrame, text='고양이', variable=self.rqValue.upkind, value='422400').grid(row=row_count, column=2)
+        Radiobutton(self.categoryFrame, text='기타', variable=self.rqValue.upkind, value='429900').grid(row=row_count, column=3)
+        row_count += 1
+
+        Radiobutton(self.categoryFrame, text='전체', variable=self.rqValue.state, value='0').grid(row=row_count, column=0)
+        Radiobutton(self.categoryFrame, text='공고중', variable=self.rqValue.state, value='notice').grid(row=row_count, column=1)
+        Radiobutton(self.categoryFrame, text='보호중', variable=self.rqValue.state, value='protect').grid(row=row_count, column=2)
+        row_count += 1
+
+        Button(self.categoryFrame, text='출력', command=self.printAnimalList).grid(row=row_count, column=0)
+
+        self.mainFrame = Canvas(self.window)
+        self.mainFrame.pack()
+        
+        
+        self.pageFrame = Frame(self.window)
+        self.pageFrame.pack()
+        Button(self.pageFrame, text='이전', command=self.prevPage).grid(row=0, column=0)
+        self.pageLabel = Label(self.pageFrame, text='1', font=("Helvetica", 10), width=8)
+        self.pageLabel.grid(row=0, column=1)
+        Button(self.pageFrame, text='다음', command=self.nextPage).grid(row=0, column=2)
+
+
+        self.printAnimalList()
+        self.window.mainloop()
+
+    def setRoot(self):
+        self.rqValue.set()
+        self.response = self.rqValue.getValue()
+        print(self.response.url)
+        if self.response.status_code == 200: # 성공했을때
+            self.root = ET.fromstring(self.response.text)
+            for item in self.root.iter("body"): # 하나가지고 for문 쓰는데 어떻게 값을 꺼내오지
+                self.totalCount = int(item.findtext("totalCount"))
+                self.lastPage = (self.totalCount + self.rqValue.numOfRows - 1) // self.rqValue.numOfRows
+                self.pageLabel['text'] = str(self.rqValue.pageNo)
+            return True
+        return False # 실패
+    def SetAnimalList(self):
+        if not self.setRoot():
+            print("읽는데 실패함")
+            return
+        self.animalList.clear()
+        for item in self.root.iter("item"):
+            animal = Animal()
+            animal.setMember(item)
+            self.animalList.append(animal)
+
+    def printAnimalList(self):
+        self.SetAnimalList()
+
+        for item in self.animalLabelList: # 무식한 방법의 삭제, 라벨 껍데기는 보관하고 내부만 바꾸는게 나을것, 그래야 격자 배치도 정갈하게 할듯
+            item.destroy()
+        self.animalLabelList.clear()
+
+        row_count = 0
+        for item in self.animalList:
+            label = Label(self.mainFrame, height=1, text=item.getSimpleData(), font=("Helvetica", 10))
+            label.grid(row=row_count, column=0)
+            # 라벨이랑 그리드를 조합하면 왼쪽 정렬이 안되고 중앙정렬이라서 크기가 다르면 들쭐날쭉하게 나옴
+            # 지금 출력 방식은 못생기게 나오니까 라벨을 관리하고 안에 각 요소들을 배치하는 클래스를 만들어 쓰든가 해야할듯
+            self.animalLabelList.append(label)
+            row_count += 1
+
+    def prevPage(self):
+        if self.rqValue.pageNo <= 1:
+            print("첫 페이지 입니다.")
+            return
+        self.rqValue.pageNo -= 1
+        self.printAnimalList()
+    def nextPage(self):
+        if self.rqValue.pageNo >= self.lastPage:
+            print("마지막 페이지 입니다.")
+            return
+        self.rqValue.pageNo += 1
+        self.printAnimalList()
