@@ -1,16 +1,20 @@
 import xml.etree.ElementTree as ET
+from tkinter import font
 from animal import *
 from myLabel import *
 from requestValue import *
+from utils import *
 
 width = 1280
 height = 720
-
+# 텍스트 배율 가져오기
 class TkWindow:
     def __init__(self):
         self.window = Tk()
         self.window.geometry(str(width) + "x" + str(height))
         self.window.title("타이틀이름")
+        scaling_factor = get_windows_text_scaling()#윈도우 텍스트 배율 받아옴
+        font1 = font.Font(size=int(12.0/scaling_factor), family='Helvetica')
 
         self.animalLabelList = []
         self.animalList = []
@@ -24,24 +28,24 @@ class TkWindow:
         self.categoryFrame.pack()
 
         row_count = 0
-        Label(self.categoryFrame, text='검색 시작일', font=("Helvetica", 10), width=10).grid(row=row_count, column=0)
-        Entry(self.categoryFrame, textvariable=self.rqValue.bgnde, justify=RIGHT, width=10).grid(row=row_count, column=1)
-        Label(self.categoryFrame, text='검색 종료일', font=("Helvetica", 10), width=10).grid(row=row_count, column=2)
-        Entry(self.categoryFrame, textvariable=self.rqValue.endde, justify=RIGHT, width=10).grid(row=row_count, column=3)
+        Label(self.categoryFrame, font=font1, text='검색 시작일', width=10).grid(row=row_count, column=0)
+        Entry(self.categoryFrame, font=font1, textvariable=self.rqValue.bgnde, justify=RIGHT, width=10).grid(row=row_count, column=1)
+        Label(self.categoryFrame, font=font1, text='검색 종료일', width=10).grid(row=row_count, column=2)
+        Entry(self.categoryFrame, font=font1, textvariable=self.rqValue.endde, justify=RIGHT, width=10).grid(row=row_count, column=3)
         row_count += 1
 
-        Radiobutton(self.categoryFrame, text='전체', variable=self.rqValue.upkind, value='0',command=self.disablePrevNext).grid(row=row_count, column=0)
-        Radiobutton(self.categoryFrame, text='개', variable=self.rqValue.upkind, value='417000',command=self.disablePrevNext).grid(row=row_count, column=1)
-        Radiobutton(self.categoryFrame, text='고양이', variable=self.rqValue.upkind, value='422400',command=self.disablePrevNext).grid(row=row_count, column=2)
-        Radiobutton(self.categoryFrame, text='기타', variable=self.rqValue.upkind, value='429900',command=self.disablePrevNext).grid(row=row_count, column=3)
+        Radiobutton(self.categoryFrame, font=font1, text='전체', variable=self.rqValue.upkind, value='0', command=self.disablePrevNext).grid(row=row_count, column=0)
+        Radiobutton(self.categoryFrame, font=font1, text='개', variable=self.rqValue.upkind, value='417000', command=self.disablePrevNext).grid(row=row_count, column=1)
+        Radiobutton(self.categoryFrame, font=font1, text='고양이', variable=self.rqValue.upkind, value='422400', command=self.disablePrevNext).grid(row=row_count, column=2)
+        Radiobutton(self.categoryFrame, font=font1, text='기타', variable=self.rqValue.upkind, value='429900', command=self.disablePrevNext).grid(row=row_count, column=3)
         row_count += 1
 
-        Radiobutton(self.categoryFrame, text='전체', variable=self.rqValue.state, value='0',command=self.disablePrevNext).grid(row=row_count, column=0)
-        Radiobutton(self.categoryFrame, text='공고중', variable=self.rqValue.state, value='notice',command=self.disablePrevNext).grid(row=row_count, column=1)
-        Radiobutton(self.categoryFrame, text='보호중', variable=self.rqValue.state, value='protect',command=self.disablePrevNext).grid(row=row_count, column=2)
+        Radiobutton(self.categoryFrame, font=font1, text='전체', variable=self.rqValue.state, value='0', command=self.disablePrevNext).grid(row=row_count, column=0)
+        Radiobutton(self.categoryFrame, font=font1, text='공고중', variable=self.rqValue.state, value='notice', command=self.disablePrevNext).grid(row=row_count, column=1)
+        Radiobutton(self.categoryFrame, font=font1, text='보호중', variable=self.rqValue.state, value='protect', command=self.disablePrevNext).grid(row=row_count, column=2)
         row_count += 1
 
-        self.setAndPrintButton = Button(self.categoryFrame, text='출력', command=self.setAndPrint)
+        self.setAndPrintButton = Button(self.categoryFrame, font=font1, text='출력', command=self.setAndPrint)
         self.setAndPrintButton.grid(row=row_count, column=0)
 
         self.mainFrame = Canvas(self.window)
@@ -50,15 +54,15 @@ class TkWindow:
         
         self.pageFrame = Frame(self.window)
         self.pageFrame.pack()
-        self.prevButton = Button(self.pageFrame, text='이전', command=self.prevPage)
+        self.prevButton = Button(self.pageFrame, font=font1, text='이전', command=self.prevPage)
         self.prevButton.grid(row=0, column=0)
-        self.pageLabel = Label(self.pageFrame, text='1', font=("Helvetica", 10), width=8)
+        self.pageLabel = Label(self.pageFrame, font=font1, text=str(self.curPage), width=8)
         self.pageLabel.grid(row=0, column=1)
-        self.nextButton = Button(self.pageFrame, text='다음', command=self.nextPage)
+        self.nextButton = Button(self.pageFrame, font=font1, text='다음', command=self.nextPage)
         self.nextButton.grid(row=0, column=2)
 
         for i in range(self.numOfPage):
-            label = Label(self.mainFrame, height=1, text='', font=("Helvetica", 10))
+            label = Label(self.mainFrame, font=font1, text='', height=1)
             label.grid(row=i, column=0)
             # 라벨이랑 그리드를 조합하면 왼쪽 정렬이 안되고 중앙정렬이라서 크기가 다르면 들쭐날쭉하게 나옴
             # 지금 출력 방식은 못생기게 나오니까 라벨을 관리하고 안에 각 요소들을 배치하는 클래스를 만들어 쓰든가 해야할듯

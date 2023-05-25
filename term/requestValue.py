@@ -6,7 +6,7 @@ class RequestValue:
     def __init__(self, numOfPage):
         self.numOfRows = 10 * numOfPage
         self.pageNo = 1
-        self.queryParams = {'serviceKey': service_key, 'numOfRows': str(self.numOfRows), 'pageNo':str(self.pageNo)}
+        self.queryParams = {'serviceKey': service_key, 'numOfRows': str(self.numOfRows), 'pageNo': str(self.pageNo)}
 
         self.bgnde = StringVar()
         self.endde = StringVar()
