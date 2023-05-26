@@ -1,3 +1,6 @@
 from tkWindow import*
 
-TkWindow()
+def main():
+    TkWindow()
+
+main()
