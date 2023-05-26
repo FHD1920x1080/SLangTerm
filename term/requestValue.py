@@ -48,7 +48,7 @@ class RequestValue:
         self.setParams('endde', self.endde.get())
         self.setParamsRadio('upkind', self.upkind.get())
         self.setParamsRadio('state', self.state.get())
-        # 지역코드 set
+        # 지역코드 set 추가해야함
         self.queryParams['numOfRows'] = str(self.numOfRows)
         self.queryParams['pageNo'] = str(self.pageNo)
     def getValue(self):

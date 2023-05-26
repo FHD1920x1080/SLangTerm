@@ -31,17 +31,12 @@ class Animal:
     totalCount = None  # 전체 결과 수
     #무엇을 보관하는게 맞을까, 다 해도 되고
     def __init__(self, item):
-        self.kindCd = item.findtext("kindCd")
-        self.age = item.findtext("age")
-        self.careNm = item.findtext("careNm")
-        self.careAddr = item.findtext("careAddr")
+        #self.filename   = item.findtext("filename")
+        self.kindCd     = item.findtext("kindCd")
+        self.age        = item.findtext("age")
+        self.careNm     = item.findtext("careNm")
+        self.careAddr   = item.findtext("careAddr")
 
-    def setMember(self, item):
-        self.filename = item.findtext("filename")
-        self.kindCd = item.findtext("kindCd")
-        self.age = item.findtext("age")
-        self.careNm = item.findtext("careNm")
-        self.careAddr = item.findtext("careAddr")
 
     def getSimpleData(self):
         return self.kindCd + "   " + self.age + "   " + self.careNm + "   " + self.careAddr
