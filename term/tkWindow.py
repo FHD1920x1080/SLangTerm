@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import tkinter.ttk
 from tkinter import font
 from customLabel import *
 from requestValue import *
@@ -14,7 +15,15 @@ class TkWindow:
         self.window.title("타이틀이름")
         scaling_factor = get_windows_text_scaling()#윈도우 텍스트 배율 받아옴
         font1 = font.Font(size=int(12.0/scaling_factor), family='Helvetica')
+        self.window.configure(bg='light salmon')
 
+        notebook = tkinter.ttk.Notebook(self.window, width=width)
+        notebook.pack()
+
+        self.noteBook1 = Frame(self.window)
+        notebook.add(self.noteBook1, text="조회")
+
+        self.animalCanvasList = []
         self.ListViewLabels = []
         self.animals = []
         self.totalCount = 0 # len(self.animals)과는 다름, 페이지와 상관없이 검색한 전체 개수
@@ -24,7 +33,7 @@ class TkWindow:
         self.rqValue = RequestValue(self.numOfPage) # 페이지의 10배만큼 읽음. 100개
 
         self.categoryFrame = Frame(self.window)
-        self.categoryFrame.pack()
+        self.categoryFrame.pack(side="top")
 
         row_count = 0
         Label(self.categoryFrame, font=font1, text='검색 시작일', width=10).grid(row=row_count, column=0)
@@ -47,8 +56,16 @@ class TkWindow:
         self.setAndPrintButton = Button(self.categoryFrame, font=font1, text='출력', command=self.setAndPrint)
         self.setAndPrintButton.grid(row=row_count, column=0)
 
-        self.mainFrame = Canvas(self.window)
-        self.mainFrame.pack()
+        self.mainFrame = Frame(self.window, width=1280, height=400)
+        self.mainFrame.pack(side="top", expand=True, fill="both", padx=5)
+
+        # scrollbar 추가를 위해서 canvas 사용
+        self.scrollbar = Scrollbar(self.mainFrame, orient="vertical")
+        self.scrollbar.pack(side="right", fill="y")
+        self.mainCanvas = Canvas(self.mainFrame, width=1280, height=400, scrollregion=(0, 0, 0, 400*self.numOfPage/2),
+                                 yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command=self.mainCanvas.yview)
+        self.mainCanvas.pack(expand=True, side="left", fill="both")
         
         
         self.pageFrame = Frame(self.window)
@@ -60,11 +77,19 @@ class TkWindow:
         self.nextButton = Button(self.pageFrame, font=font1, text='다음', command=self.nextPage)
         self.nextButton.grid(row=0, column=2)
 
+        # 2
+        # 10개 고정된 객체 출력을 위해
+        # canvas내에 create_window를 해야 scroll이 가능 일일히 좌표 계산을 해야함
         for i in range(self.numOfPage):
-            label = Label(self.mainFrame, font=font1, text='', height=1)
-            self.ListViewLabels.append(ListViewLabel(self.mainFrame, font1, i, 0))
+            self.animalCanvasList.append(Canvas(self.mainCanvas, relief="groove", borderwidth=5,bg='cornsilk1',width=640, height=400))
 
-        #self.setAndPrint() 이걸 하면 초기에 값이 나오는데 프로그램 실행이 느려짐
+            self.mainCanvas.create_window(((i % 2) * 640), ((i // 2) * 400), anchor="nw",window=self.animalCanvasList[i])
+
+            self.ListViewLabels.append(ListViewLabel(self.mainFrame, font1, i, 0))
+            self.mainCanvas.create_window(((i % 2) * 640), ((i // 2) * 400), anchor="nw", window=self.ListViewLabels[i].label)
+
+
+        self.setAndPrint() #이걸 하면 초기에 값이 나오는데 프로그램 실행이 느려짐
         self.window.mainloop()
 
     def setRoot(self):
@@ -103,9 +128,10 @@ class TkWindow:
         i = 0 # 라벨 인덱스
         curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
         curPageCount = min(self.numOfPage, len(self.animals)-curPageFirstIndex)
-        #print(curPageFirstIndex, curPageCount, len(self.animals))
+        print(curPageFirstIndex, curPageCount, len(self.animals))
         while i < curPageCount:
             self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i].getSimpleData())
+            print(self.animals[curPageFirstIndex + i].kindCd)
             i += 1
         while i < self.numOfPage: # 페이지의 라벨 수보다 동물이 적으면 공백
             self.ListViewLabels[i].setContent('')

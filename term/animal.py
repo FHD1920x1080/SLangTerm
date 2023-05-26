@@ -37,6 +37,7 @@ class Animal:
         self.careAddr = item.findtext("careAddr")
 
     def setMember(self, item):
+        self.filename = item.findtext("filename")
         self.kindCd = item.findtext("kindCd")
         self.age = item.findtext("age")
         self.careNm = item.findtext("careNm")
@@ -45,3 +46,5 @@ class Animal:
     def getSimpleData(self):
         return self.kindCd + "   " + self.age + "   " + self.careNm + "   " + self.careAddr
 
+    def getFilename(self):
+        return self.filename
