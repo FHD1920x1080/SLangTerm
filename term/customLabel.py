@@ -7,7 +7,7 @@ import tkWindow
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
 class ListViewLabel:
-    def __init__(self, master, font, width=20, height=20, x=0, y=0, ):
+    def __init__(self, master, font, width=0, height=0, x=0, y=0, ):
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width-40, height=height)# 스크롤바 두께만큼 작게함
         master.create_window(x, y, anchor="nw", window=self.canvas)
 
