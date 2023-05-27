@@ -8,7 +8,7 @@ import tkWindow
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
 class ListViewLabel:
     def __init__(self, master, font, width=20, height=20, x=0, y=0, ):
-        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width-50, height=height)# 스크롤바 두께만큼 작게함
+        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width-40, height=height)# 스크롤바 두께만큼 작게함
         master.create_window(x, y, anchor="nw", window=self.canvas)
 
         # self.image = None
