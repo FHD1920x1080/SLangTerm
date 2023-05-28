@@ -5,6 +5,9 @@ from customLabel import *
 from requestValue import *
 from utils import *
 
+from threading import Thread
+
+
 width = 1280
 height = 720
 font12 = None
@@ -35,17 +38,39 @@ class TkWindow:
 
         self.inquiryFrame = Frame(self.window, bg='light salmon')
         self.TabBar.add(self.inquiryFrame, text="조회")
+        self.regiSearch = Frame(self.window, bg='light salmon')
+        self.TabBar.add(self.regiSearch, text="등록검색")
+        self.interestsFrame = Frame(self.window, bg='light salmon')
+        self.TabBar.add(self.interestsFrame, text="관심목록")
+        #아래 tabChanged
+        self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
+
+        #조회에 관한 실행
         self.setCategoriFrame(self.inquiryFrame)
         self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
         self.setPageFrame(self.inquiryFrame)
+        self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
+
+        #등록검색에 관한 실행
+
+        #관심목록에 관한 실행
 
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
-
-        self.interestsFrame = Frame(self.window)
-        self.TabBar.add(self.interestsFrame, text="관심목록")
-
-        self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
         self.window.mainloop()
+
+    # tab변경 시 화면 변경
+    # 이거를 사용하면 탭 마다 위젯만 추가 제거하는 식으로 실행
+    # 미세한 차이의 성능 저하, 큰 영향 없음
+    def tabChanged(self,tab):
+        selectedTab = tab.widget.select()
+        currentTab = tab.widget.tab(selectedTab,"text")
+        if currentTab == "조회":
+            pass
+        elif currentTab == "등록검색":
+            print("select")
+            pass
+        elif currentTab == "관심목록":
+            pass
 
     def setRoot(self):
         self.rqValue.set()
@@ -74,8 +99,10 @@ class TkWindow:
         self.pageLabel['text'] = str(self.curPage)
         self.prevButton['state'] = 'normal'
         self.nextButton['state'] = 'normal'
-        self.printListView()
-
+        th1 = Thread(target=self.printListView)
+        th2 = Thread(target=self.printListThumbnail)
+        th1.start()
+        th2.start()
     def disablePrevNext(self):
         self.prevButton['state'] = 'disable'
         self.nextButton['state'] = 'disable'
@@ -86,10 +113,22 @@ class TkWindow:
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         # print(curPageFirstIndex, curPageCount, len(self.animals))
         while i < curPageCount:
-            self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i])
+            self.window.after(0,self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i]))
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
-            self.ListViewLabels[i].setContent(None)
+            self.window.after(0,self.ListViewLabels[i].setContent(None))
+            i += 1
+
+    #두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
+    def printListThumbnail(self):
+        i = 0  # 라벨 인덱스
+        curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
+        curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
+        while i < curPageCount:
+            self.window.after(0,self.ListViewLabels[i].setImage(self.animals[curPageFirstIndex + i]))
+            i += 1
+        while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
+            self.window.after(0,self.ListViewLabels[i].setImage(None))
             i += 1
 
     def prevPage(self):
@@ -101,7 +140,10 @@ class TkWindow:
             self.rqValue.pageNo -= 1
             self.setanimals()
         self.pageLabel['text'] = str(self.curPage)
-        self.printListView()
+        th1 = Thread(target=self.printListView)
+        th2 = Thread(target=self.printListThumbnail)
+        th1.start()
+        th2.start()
 
     def nextPage(self):
         if self.curPage >= self.lastPage:
@@ -112,7 +154,10 @@ class TkWindow:
             self.rqValue.pageNo += 1
             self.setanimals()
         self.pageLabel['text'] = str(self.curPage)
-        self.printListView()
+        th1 = Thread(target=self.printListView)
+        th2 = Thread(target=self.printListThumbnail)
+        th1.start()
+        th2.start()
 
     def setCategoriFrame(self, master):
         self.categoryFrame = Frame(master)

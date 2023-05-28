@@ -34,3 +34,4 @@ class RequestValue:
         self.setParams('pageNo', str(self.pageNo))
     def getValue(self):
         return requests.get(url, params=self.queryParams)
+
