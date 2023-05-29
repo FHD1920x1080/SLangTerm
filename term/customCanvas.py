@@ -156,13 +156,13 @@ class PopUpCanvas(SimpleViewCanvas):
         self.canvas.create_window(width - 20, 10, anchor="nw", window=self.exitButton)
         # self.image = None
         self.kindCd = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(250, 10, anchor="nw", window=self.kindCd)
+        self.canvas.create_window(240, 10, anchor="nw", window=self.kindCd)
         self.age = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(250, 40, anchor="nw", window=self.age)
+        self.canvas.create_window(240, 40, anchor="nw", window=self.age)
         self.careNm = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(250, 70, anchor="nw", window=self.careNm)
+        self.canvas.create_window(240, 70, anchor="nw", window=self.careNm)
         self.careAddr = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(250, 100, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(240, 100, anchor="nw", window=self.careAddr)
         self.image = Label(self.canvas, image='')
         self.canvas.create_window(10, 10, anchor="nw", window=self.image)
 
@@ -170,7 +170,7 @@ class PopUpCanvas(SimpleViewCanvas):
 
         size = len(self.Window.interestAnimals)
         self.addButton = Button(text="관심 목록에 등록", font=font, command=self.addInterestAnimals)
-        self.canvas.create_window(250, 150, anchor="nw", window=self.addButton)
+        self.canvas.create_window(240, 150, anchor="nw", window=self.addButton)
         for i in range(size):
             if self.Window.interestAnimals[i].filename == self.animal.filename:
                 self.addButton.configure(text="관심 목록에서 제거", command=lambda: self.removeInterestAnimals(i))
@@ -178,8 +178,8 @@ class PopUpCanvas(SimpleViewCanvas):
 
 
         #지도용 frame
-        self.mapImage = Frame(self.canvas,width=tkWindow.width / 2, height=tkWindow.height * 1 / 3)
-        self.canvas.create_window(10, 260, anchor="nw", window=self.mapImage)
+        self.mapImage = Frame(self.canvas,width=width, height=height * 2 / 3)
+        self.canvas.create_window(5, 250, anchor="nw", window=self.mapImage)
         self.setUpMap()
     def setUpMap(self):
         imageGet = folium.Map(location=[33, 33], zoom_start=13)
@@ -191,9 +191,9 @@ class PopUpCanvas(SimpleViewCanvas):
     def showMap(self,frame):
         sys.excepthook = cef.ExceptHook
         window_info = cef.WindowInfo(frame.winfo_id())
-        window_info.SetAsChild(frame.winfo_id(), [0, 0, tkWindow.width / 2, tkWindow.height * 1 / 3])
+        window_info.SetAsChild(frame.winfo_id(), [0, 0, tkWindow.width / 2, tkWindow.height * 1 / 2])
         cef.Initialize()
-        self.browser = cef.CreateBrowserSync(window_info, url='file:///map.html')
+        self.browser = cef.CreateBrowserSync(window_info, url='https://map.kakao.com/')
         cef.MessageLoop()
     def changeMap(self):
         #동물의 좌표값 필요

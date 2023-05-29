@@ -7,7 +7,7 @@ from utils import *
 
 
 width = 1280
-height = 720
+height = 960
 font12 = None
 popUpCanvas = None
 
