@@ -26,6 +26,8 @@ class TkWindow:
 
         self.ListViewLabels = []
         self.animals = []
+        self.animalsPrev = [] # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
+        self.animalsNext = [] # 다음 10페이지 분량의 동물들
         self.root = None
         self.totalCount = 0  # len(self.animals)과는 다름, 페이지와 상관없이 검색한 전체 개수
         self.numOfPage = 16  # 한페이지에 표시할 수
@@ -73,7 +75,7 @@ class TkWindow:
             pass
 
     def setRoot(self):
-        self.rqValue.set()
+        self.rqValue.setParams()
         self.response = self.rqValue.getValue()
         print(self.response.url)
         if self.response.status_code == 200:  # 성공했을때
@@ -89,6 +91,8 @@ class TkWindow:
             print("읽는데 실패함")
             return
         self.animals.clear()
+        self.animalsPrev.clear()
+        self.animalsNext.clear()
         for item in self.root.iter("item"):
             self.animals.append(Animal(item))
 
@@ -112,12 +116,12 @@ class TkWindow:
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         # print(curPageFirstIndex, curPageCount, len(self.animals))
         while i < curPageCount:
-            self.window.after(0,self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i]))
-            self.window.after(0, self.ListViewLabels[i].setImage(None))  # 일단 이미지 싹 밀어버림
+            self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i])
+            self.ListViewLabels[i].clearImage()  # 일단 이미지 싹 밀어버림
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
-            self.window.after(0,self.ListViewLabels[i].setContent(None))
-            self.window.after(0, self.ListViewLabels[i].setImage(None))
+            self.ListViewLabels[i].clearContent()
+            self.ListViewLabels[i].clearImage()
             i += 1
 
     #두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
@@ -127,16 +131,15 @@ class TkWindow:
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         ordPage = self.curPage
         while i < curPageCount:
-            if ordPage != self.curPage:# 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함
-                print(i, ordPage, self.curPage)
+            # 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함, setImage에서 False 반환하도록 수정함
+            if not self.ListViewLabels[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage):
+                print(i, ordPage, self.curPage)#참조 전달이라 제대로 먹는듯
                 return
-            self.window.after(0, self.ListViewLabels[i].setImage(self.animals[curPageFirstIndex + i]))
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
             if ordPage != self.curPage:
-                print(i, ordPage, self.curPage)
                 return
-            self.window.after(0, self.ListViewLabels[i].setImage(None))
+            self.ListViewLabels[i].clearImage()
             i += 1
 
     def prevPage(self):

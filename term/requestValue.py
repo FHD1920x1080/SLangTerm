@@ -16,22 +16,22 @@ class RequestValue:
         self.state.set(' ')
 
 
-    def setParams(self, key, value):
+    def setParam(self, key, value):
         if value and value != ' ': # 값이 있으면, 공백 제거로 할 수도 있지만 이게 더 빠를듯
             self.queryParams[key] = value
         else: #
             self.queryParams.pop(key, None) # 없으면 None이 반환되는데 딱히 반환값은 필요 없음
 
-    def set(self):
+    def setParams(self):
         tempParams = self.queryParams
-        self.setParams('bgnde', self.bgnde.get())
-        self.setParams('endde', self.endde.get())
-        self.setParams('upkind', self.upkind.get())
-        self.setParams('state', self.state.get())
+        self.setParam('bgnde', self.bgnde.get())
+        self.setParam('endde', self.endde.get())
+        self.setParam('upkind', self.upkind.get())
+        self.setParam('state', self.state.get())
         # 지역코드 set 추가해야함
 
-        self.setParams('numOfRows', str(self.numOfRows))
-        self.setParams('pageNo', str(self.pageNo))
+        self.setParam('numOfRows', str(self.numOfRows))
+        self.setParam('pageNo', str(self.pageNo))
     def getValue(self):
         return requests.get(url, params=self.queryParams)
 
