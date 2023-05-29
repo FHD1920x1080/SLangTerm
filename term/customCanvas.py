@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import font
 from animal import *
+from threading import Thread
 import tkWindow
 
 # 이미지 출력을 위한 모듈
@@ -99,17 +100,31 @@ class SimpleViewCanvas:
         self.mapImage.image = imgTk
         pass
 
+    def setHighImage(self, animal, ordPage, curPage):
+        imageGet = requests.get(animal.popfile, stream=True)
+        imageSet = imageGet.content
+        img = Image.open(io.BytesIO(imageSet))
+        img = img.resize((200, 200), Image.ANTIALIAS)
+
+        if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
+            return False
+        imgTk = ImageTk.PhotoImage(img)
+        self.image.configure(image=imgTk)
+        self.image.image = imgTk
+        return True
     def detailPage(self):
         print("detail")
         if tkWindow.popUpCanvas:
             tkWindow.popUpCanvas.destroy()
         tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
         tkWindow.popUpCanvas.setContent(self.animal)
+        
         tkWindow.popUpCanvas.setImage(self.animal, 0, 0)
 
         #얘가 지도 그리기
         tkWindow.popUpCanvas.setMap(self.animal)
-        pass
+              #Thread(target=tkWindow.popUpCanvas.setHighImage(self.animal, 0, 0)).start()
+        Thread(target=lambda: tkWindow.popUpCanvas.setHighImage(self.animal, 0, 0)).start()
 
 
 class ListViewCanvas(SimpleViewCanvas):
@@ -163,10 +178,11 @@ class PopUpCanvas(SimpleViewCanvas):
         #지도용 label
         self.mapImage = Label(self.canvas, image='')
         self.canvas.create_window(10,160,anchor="nw",window=self.mapImage)
+        # 사진 클릭으로 동물에 대한 자세한 출력
 
 # 상세 보기 라벨, 이거 자체에 지도를
 class DetaileVeiwCanvas(SimpleViewCanvas):
     def __init__(self, master, font):
-        super().__init__(master, font)
+        super().__init__(master)
 
     pass
