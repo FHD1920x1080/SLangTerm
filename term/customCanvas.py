@@ -9,9 +9,12 @@ import requests
 import io
 
 #지도 출력을 위한 모듈
+import threading
+import sys
 import folium
-#패키지 설치 selenium ->웹 브라우저 제어,자동 조작
-from selenium import webdriver
+from cefpython3 import cefpython as cef
+
+
 
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
@@ -72,6 +75,8 @@ class SimpleViewCanvas:
         self.careNm['text'] = animal.careNm
         self.careAddr['text'] = animal.careAddr
 
+
+
     def clearImage(self):
         self.image.configure(image='')
 
@@ -87,17 +92,8 @@ class SimpleViewCanvas:
         self.image.configure(image=imgTk)
         self.image.image = imgTk
         return True
-    def setMap(self,animal):
-        #동물의 좌표값 필요
-        #여러가지 해보는중
-        imageGet = folium.Map(location=[33,33],zoom_start=13)
-        img = Image.open(io.BytesIO(imageGet))
-        img = img.resize((800, 600), Image.ANTIALIAS)
 
-        imgTk = ImageTk.PhotoImage(img)
-        self.mapImage.configure(image=imgTk)
-        self.mapImage.image = imgTk
-        pass
+
 
     def detailPage(self):
         print("detail")
@@ -106,9 +102,8 @@ class SimpleViewCanvas:
         tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
         tkWindow.popUpCanvas.setContent(self.animal)
         tkWindow.popUpCanvas.setImage(self.animal, 0, 0)
-
         #얘가 지도 그리기
-        tkWindow.popUpCanvas.setMap(self.animal)
+        tkWindow.popUpCanvas.changeMap()
         pass
 
 
@@ -160,9 +155,31 @@ class PopUpCanvas(SimpleViewCanvas):
         self.image = Label(self.canvas, image='')
         self.canvas.create_window(10, 130, anchor="nw", window=self.image)
 
-        #지도용 label
-        self.mapImage = Label(self.canvas, image='')
-        self.canvas.create_window(10,160,anchor="nw",window=self.mapImage)
+        #지도용 frame
+        self.mapImage = Frame(self.canvas,width=tkWindow.width / 2, height=tkWindow.height * 1 / 3)
+        self.canvas.create_window(10,360,anchor="nw",window=self.mapImage)
+        self.setUpMap()
+    def setUpMap(self):
+        imageGet = folium.Map(location=[33, 33], zoom_start=13)
+        folium.Marker([33, 33], popup='보호중').add_to(imageGet)
+        imageGet.save('map.html')
+        thread = threading.Thread(target=self.showMap, args=(self.mapImage,))
+        thread.daemon = True
+        thread.start()
+    def showMap(self,frame):
+        sys.excepthook = cef.ExceptHook
+        window_info = cef.WindowInfo(frame.winfo_id())
+        window_info.SetAsChild(frame.winfo_id(), [0, 0, tkWindow.width / 2, tkWindow.height * 1 / 3])
+        cef.Initialize()
+        self.browser = cef.CreateBrowserSync(window_info, url='file:///map.html')
+        cef.MessageLoop()
+    def changeMap(self):
+        #동물의 좌표값 필요
+        imageGet = folium.Map(location=[44, 44], zoom_start=13)
+        folium.Marker([33, 33], popup='보호중').add_to(imageGet)
+        imageGet.save('map.html')
+        self.browser.Reload()
+
 
 # 상세 보기 라벨, 이거 자체에 지도를
 class DetaileVeiwCanvas(SimpleViewCanvas):
