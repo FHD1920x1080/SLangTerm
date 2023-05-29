@@ -8,6 +8,10 @@ from PIL import ImageTk, Image
 import requests
 import io
 
+#지도 출력을 위한 모듈
+import folium
+#패키지 설치 selenium ->웹 브라우저 제어,자동 조작
+from selenium import webdriver
 
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
@@ -83,6 +87,17 @@ class SimpleViewCanvas:
         self.image.configure(image=imgTk)
         self.image.image = imgTk
         return True
+    def setMap(self,animal):
+        #동물의 좌표값 필요
+        #여러가지 해보는중
+        imageGet = folium.Map(location=[33,33],zoom_start=13)
+        img = Image.open(io.BytesIO(imageGet))
+        img = img.resize((800, 600), Image.ANTIALIAS)
+
+        imgTk = ImageTk.PhotoImage(img)
+        self.mapImage.configure(image=imgTk)
+        self.mapImage.image = imgTk
+        pass
 
     def detailPage(self):
         print("detail")
@@ -91,6 +106,9 @@ class SimpleViewCanvas:
         tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
         tkWindow.popUpCanvas.setContent(self.animal)
         tkWindow.popUpCanvas.setImage(self.animal, 0, 0)
+
+        #얘가 지도 그리기
+        tkWindow.popUpCanvas.setMap(self.animal)
         pass
 
 
@@ -142,9 +160,9 @@ class PopUpCanvas(SimpleViewCanvas):
         self.image = Label(self.canvas, image='')
         self.canvas.create_window(10, 130, anchor="nw", window=self.image)
 
-        # 사진 클릭으로 동물에 대한 자세한 출력
-        self.image.bind("<Button-1>", lambda event: self.detailPage())
-
+        #지도용 label
+        self.mapImage = Label(self.canvas, image='')
+        self.canvas.create_window(10,160,anchor="nw",window=self.mapImage)
 
 # 상세 보기 라벨, 이거 자체에 지도를
 class DetaileVeiwCanvas(SimpleViewCanvas):
