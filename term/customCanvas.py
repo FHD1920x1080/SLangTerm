@@ -11,7 +11,7 @@ import io
 
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
-class SimpleViewLabel:
+class SimpleViewCanvas:
     errorMsg = None  # 오류메시지
     reqNo = None  # 요청번호
     resultCode = None  # 결과코드
@@ -43,6 +43,10 @@ class SimpleViewLabel:
     pageNo = None  # 페이지 번호
     totalCount = None  # 전체 결과 수
     image = None
+    def __init__(self, master, font, width=0, height=0, x=0, y=0, ):
+        self.canvas = Canvas(master, relief="groove", borderwidth=10, bg='lightgray', width=width - 40,
+                             height=height)  # 스크롤바 두께만큼 작게함
+        master.create_window(x, y, anchor="nw", window=self.canvas)
     def clearContent(self):
         self.kindCd['text'] = ''
         self.age['text'] = ''
@@ -75,7 +79,7 @@ class SimpleViewLabel:
         print("detail")
         pass
 
-class ListViewLabel(SimpleViewLabel):
+class ListViewCanvas(SimpleViewCanvas):
     def __init__(self, master, font, width=0, height=0, x=0, y=0, ):
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width-40, height=height)# 스크롤바 두께만큼 작게함
         master.create_window(x, y, anchor="nw", window=self.canvas)
@@ -95,10 +99,10 @@ class ListViewLabel(SimpleViewLabel):
         #사진 클릭으로 동물에 대한 자세한 출력
         self.image.bind("<Button-1>", lambda event: self.detailPage())
 
-class GridViewLabel(SimpleViewLabel):
+class GridViewCanvas(SimpleViewCanvas):
     pass
 
-class PopUpCanvas(SimpleViewLabel):
+class PopUpCanvas(SimpleViewCanvas):
     def __init__(self, master, font, width=0, height=0, x=0, y=0, ):
         self.canvas = Canvas(master, relief="groove", borderwidth=10, bg='lightgray', width=width - 40,
                              height=height)  # 스크롤바 두께만큼 작게함
@@ -120,5 +124,5 @@ class PopUpCanvas(SimpleViewLabel):
         self.image.bind("<Button-1>", lambda event: self.detailPage())
 
 # 상세 보기 라벨, 이거 자체에 지도를
-class DetaileVeiwLabel(SimpleViewLabel):
+class DetaileVeiwCanvas(SimpleViewCanvas):
     pass

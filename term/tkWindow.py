@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import tkinter.ttk
 from tkinter import font
-from customLabel import *
+from customCanvas import *
 from requestValue import *
 from utils import *
 
@@ -23,7 +23,7 @@ class TkWindow:
         self.window.title("타이틀이름")
         self.window.configure(bg='light salmon')
 
-        self.ListViewLabels = []
+        self.ListViewCanvases = []
         self.animals = []
         self.animalsPrev = []  # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
         self.animalsNext = []  # 다음 10페이지 분량의 동물들
@@ -154,12 +154,12 @@ class TkWindow:
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         # print(curPageFirstIndex, curPageCount, len(self.animals))
         while i < curPageCount:
-            self.ListViewLabels[i].setContent(self.animals[curPageFirstIndex + i])
-            self.ListViewLabels[i].clearImage()  # 일단 이미지 싹 밀어버림
+            self.ListViewCanvases[i].setContent(self.animals[curPageFirstIndex + i])
+            self.ListViewCanvases[i].clearImage()  # 일단 이미지 싹 밀어버림
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
-            self.ListViewLabels[i].clearContent()
-            self.ListViewLabels[i].clearImage()
+            self.ListViewCanvases[i].clearContent()
+            self.ListViewCanvases[i].clearImage()
             i += 1
 
     # 두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
@@ -170,14 +170,14 @@ class TkWindow:
         ordPage = self.curPage
         while i < curPageCount:
             # 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함, setImage에서 False 반환하도록 수정함
-            if not self.ListViewLabels[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage):
+            if not self.ListViewCanvases[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage):
                 # print(i, ordPage, self.curPage)#참조 전달이라 제대로 먹는듯
                 return
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
             if ordPage != self.curPage:
                 return
-            self.ListViewLabels[i].clearImage()
+            self.ListViewCanvases[i].clearImage()
             i += 1
 
     def prevPage(self):
@@ -268,8 +268,8 @@ class TkWindow:
 
         # canvas내에 create_window를 해야 scroll이 가능 일일히 좌표 계산을 해야함
         for i in range(self.numOfPage):
-            label = ListViewLabel(self.mainFrame, font12, width=width, height=400, x=0, y=i * 400)
-            self.ListViewLabels.append(label)
+            label = ListViewCanvas(self.mainFrame, font12, width=width, height=400, x=0, y=i * 400)
+            self.ListViewCanvases.append(label)
 
         return self.mainFrame
 
