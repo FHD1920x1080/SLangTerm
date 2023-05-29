@@ -36,11 +36,10 @@ class TkWindow:
         self.lastPage = 1
         self.rqValue = RequestValue(self.numOfPage)  # 페이지의 10배만큼 읽음.
 
-
         self.TabBar = tkinter.ttk.Notebook(self.window)
         self.TabBar.pack(side="top", expand=True, fill="both")
 
-        self.inquiryFrame = Frame(self.window, bg='light salmon')
+        self.inquiryFrame = Canvas(self.window, bg='light salmon')
         self.TabBar.add(self.inquiryFrame, text="조회")
         self.regiSearch = Frame(self.window, bg='light salmon')
         self.TabBar.add(self.regiSearch, text="등록검색")
@@ -53,8 +52,8 @@ class TkWindow:
         self.setCategoriFrame(self.inquiryFrame)
         self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
         self.setPageFrame(self.inquiryFrame)
-
-        # self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
+        PopUpCanvas(self.inquiryFrame, font12, width=width/2, height=height*2/3, x=width/4, y=height/5.5)
+        #self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행
 
