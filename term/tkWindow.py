@@ -10,7 +10,7 @@ from threading import Thread
 width = 1280
 height = 720
 font12 = None
-
+popUpCanvas = None
 
 # 텍스트 배율 가져오기
 class TkWindow:
@@ -47,12 +47,10 @@ class TkWindow:
         self.TabBar.add(self.interestsFrame, text="관심목록")
         # 아래 tabChanged
         self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
-
         # 조회에 관한 실행
         self.setCategoriFrame(self.inquiryFrame)
         self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
         self.setPageFrame(self.inquiryFrame)
-        PopUpCanvas(self.inquiryFrame, font12, width=width/2, height=height*2/3, x=width/4, y=height/5.5)
         #self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행

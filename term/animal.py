@@ -38,6 +38,8 @@ class Animal:
         self.careNm     = item.findtext("careNm")
         self.careAddr   = item.findtext("careAddr")
 
+    def getPopfile(self):
+        return self.filename[:-6]+".jpg" # 이렇게 해도 되는줄 알았는데 어떤건 jepg로 다름 ㅋㅋ
 
     def getSimpleData(self):
         return self.kindCd + "   " + self.age + "   " + self.careNm + "   " + self.careAddr
