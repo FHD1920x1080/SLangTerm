@@ -25,11 +25,11 @@ class ListViewLabel:
         self.canvas.create_window(10, 70, anchor="nw", window=self.careNm)
         self.careAddr = Label(self.canvas, font=font, text='', height=1, bg='cyan')
         self.canvas.create_window(10, 100, anchor="nw", window=self.careAddr)
-        self.image = Label(self.canvas, text='')
-        self.canvas.create_window(10,130,anchor="nw",window=self.image)
+        self.image = Label(self.canvas, image='')
+        self.canvas.create_window(10, 130, anchor="nw",window=self.image)
 
         #사진 클릭으로 동물에 대한 자세한 출력
-        self.image.bind("<Button-1>",lambda event : self.detailPage())
+        self.image.bind("<Button-1>", lambda event: self.detailPage())
 
     def setContent(self, animal):
         if animal is None:
@@ -44,9 +44,9 @@ class ListViewLabel:
         self.careNm['text'] = animal.careNm
         self.careAddr['text'] = animal.careAddr
 
-    def setImage(self,animal):
+    def setImage(self, animal):
         if animal is None:
-            self.image['text'] = ''
+            self.image.configure(image='')
             return
 
         imageGet = requests.get(animal.filename, stream=True)
