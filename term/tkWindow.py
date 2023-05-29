@@ -7,7 +7,6 @@ from utils import *
 
 from threading import Thread
 
-
 width = 1280
 height = 720
 font12 = None
@@ -26,14 +25,17 @@ class TkWindow:
 
         self.ListViewLabels = []
         self.animals = []
-        self.animalsPrev = [] # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
-        self.animalsNext = [] # 다음 10페이지 분량의 동물들
+        self.animalsPrev = []  # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
+        self.animalsNext = []  # 다음 10페이지 분량의 동물들
+        self.animalsNextReady = False
+        self.animalsPrevReady = False
         self.root = None
-        self.totalCount = 0  # len(self.animals)과는 다름, 페이지와 상관없이 검색한 전체 개수
+        self.totalCount = 0  # len(self.animals)과는 다름, 페이지와 상관없이 검색 조건에 해당되는 모든 동물의 수
         self.numOfPage = 16  # 한페이지에 표시할 수
         self.curPage = 1
         self.lastPage = 1
-        self.rqValue = RequestValue(self.numOfPage)  # 페이지의 10배만큼 읽음. 100개
+        self.rqValue = RequestValue(self.numOfPage)  # 페이지의 10배만큼 읽음.
+
 
         self.TabBar = tkinter.ttk.Notebook(self.window)
         self.TabBar.pack(side="top", expand=True, fill="both")
@@ -44,18 +46,19 @@ class TkWindow:
         self.TabBar.add(self.regiSearch, text="등록검색")
         self.interestsFrame = Frame(self.window, bg='light salmon')
         self.TabBar.add(self.interestsFrame, text="관심목록")
-        #아래 tabChanged
+        # 아래 tabChanged
         self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
 
-        #조회에 관한 실행
+        # 조회에 관한 실행
         self.setCategoriFrame(self.inquiryFrame)
         self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
         self.setPageFrame(self.inquiryFrame)
-        self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
-        #등록검색에 관한 실행
+        # self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
-        #관심목록에 관한 실행
+        # 등록검색에 관한 실행
+
+        # 관심목록에 관한 실행
 
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
         self.window.mainloop()
@@ -63,9 +66,9 @@ class TkWindow:
     # tab변경 시 화면 변경
     # 이거를 사용하면 탭 마다 위젯만 추가 제거하는 식으로 실행
     # 미세한 차이의 성능 저하, 큰 영향 없음
-    def tabChanged(self,tab):
+    def tabChanged(self, tab):
         selectedTab = tab.widget.select()
-        currentTab = tab.widget.tab(selectedTab,"text")
+        currentTab = tab.widget.tab(selectedTab, "text")
         if currentTab == "조회":
             pass
         elif currentTab == "등록검색":
@@ -80,9 +83,6 @@ class TkWindow:
         print(self.response.url)
         if self.response.status_code == 200:  # 성공했을때
             self.root = ET.fromstring(self.response.text)  # 루트 세팅!
-            for item in self.root.iter("body"):  # body는 하나라서 반복은 한번만 함. 반복문 안쓰는법을 모름 ㅋ
-                self.totalCount = int(item.findtext("totalCount"))  # 총 개수를 받아옴
-                self.lastPage = (self.totalCount + self.numOfPage - 1) // self.numOfPage  # 마지막 페이지 정의
             return True
         return False  # 실패
 
@@ -91,15 +91,54 @@ class TkWindow:
             print("읽는데 실패함")
             return
         self.animals.clear()
-        self.animalsPrev.clear()
-        self.animalsNext.clear()
         for item in self.root.iter("item"):
             self.animals.append(Animal(item))
+
+    def setAnimalsPrev(self):
+        self.animalsPrev.clear()
+        self.animalsPrevReady = False
+        rqPageNo = (self.curPage + 9) // 10  # 현재 보고있는 animals의 페이지 요청변수
+        if rqPageNo <= 1:
+            print("미리 읽을 이전 페이지가 없음")
+            return
+        self.rqValue.pageNo = rqPageNo - 1
+        if not self.setRoot():
+            print("읽는데 실패함")
+            return
+        if self.animalsPrev: # 읽어오는 사이에 다시 다음으로 넘어가서 animalsPrev에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
+            self.animalsPrevReady = True
+            return
+        for item in self.root.iter("item"):
+            self.animalsPrev.append(Animal(item))
+        self.animalsPrevReady = True
+
+    def setAnimalsNext(self):
+        self.animalsNext.clear()  # 일단 밀어버림
+        self.animalsNextReady = False
+        rqPageNo = (self.curPage + 9) // 10  # 현재 보고있는 animals의 페이지 요청변수
+        if self.totalCount < rqPageNo * self.numOfPage * 10:  # 읽어올 다음 페이지가 없으면
+            print("미리 읽을 다음 페이지가 없음")
+            return
+        self.rqValue.pageNo = rqPageNo + 1
+        if not self.setRoot():
+            print("읽는데 실패함")
+            return
+        if self.animalsNext: # 읽어오는 사이에 다시 이전으로 돌아가서 animalsNext에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
+            self.animalsNextReady = True
+            return
+        for item in self.root.iter("item"):
+            self.animalsNext.append(Animal(item))
+        self.animalsNextReady = True
 
     def setAndPrint(self):
         self.rqValue.pageNo = 1  # 출력을 이용하면 조건을 변경하지 않았어도 첫페이지로
         self.curPage = 1
         self.setAnimals()
+        for item in self.root.iter("body"):  # body는 하나라서 반복은 한번만 함. 반복문 안쓰는법을 모름 ㅋ
+            self.totalCount = int(item.findtext("totalCount"))  # 총 개수를 받아옴
+            self.lastPage = (self.totalCount + self.numOfPage - 1) // self.numOfPage  # 마지막 페이지 정의
+        print("검색 기준 마지막 페이지는 ", self.lastPage)
+        Thread(target=self.setAnimalsNext).start() # 다음페이지 애니멀 세팅
         self.pageLabel['text'] = str(self.curPage)
         self.prevButton['state'] = 'normal'
         self.nextButton['state'] = 'normal'
@@ -124,7 +163,7 @@ class TkWindow:
             self.ListViewLabels[i].clearImage()
             i += 1
 
-    #두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
+    # 두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
     def loadCurPageThumbnail(self):
         i = 0  # 라벨 인덱스
         curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
@@ -133,7 +172,7 @@ class TkWindow:
         while i < curPageCount:
             # 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함, setImage에서 False 반환하도록 수정함
             if not self.ListViewLabels[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage):
-                print(i, ordPage, self.curPage)#참조 전달이라 제대로 먹는듯
+                # print(i, ordPage, self.curPage)#참조 전달이라 제대로 먹는듯
                 return
             i += 1
         while i < self.numOfPage:  # 페이지의 라벨 수보다 동물이 적으면 공백
@@ -148,12 +187,19 @@ class TkWindow:
             return
         self.curPage -= 1
         if self.curPage % 10 == 0:  # 11->10, 21->20, 31->30
-            self.rqValue.pageNo -= 1
-            self.setAnimals()
+            if not self.animalsPrevReady:
+                self.curPage += 1
+                print('기다려!')
+                return
+            self.animalsNext = self.animals.copy()
+            self.animalsNextReady = True
+            self.animals = self.animalsPrev.copy()
+            #print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
+            Thread(target=self.setAnimalsPrev).start()
+
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
         Thread(target=self.loadCurPageThumbnail).start()
-
 
     def nextPage(self):
         if self.curPage >= self.lastPage:
@@ -161,8 +207,16 @@ class TkWindow:
             return
         self.curPage += 1
         if self.curPage % 10 == 1:  # 10->11, 20->21, 30->31
-            self.rqValue.pageNo += 1
-            self.setAnimals()
+            if not self.animalsNextReady:
+                self.curPage -= 1
+                print('기다려!')
+                return
+            self.animalsPrev = self.animals.copy()  # 이동연산을 못하는것이 파이썬의 한계인가...
+            self.animalsPrevReady = True
+            self.animals = self.animalsNext.copy()
+            #print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
+            Thread(target=self.setAnimalsNext).start()
+
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
         Thread(target=self.loadCurPageThumbnail).start()
@@ -208,8 +262,8 @@ class TkWindow:
         self.mainScrollbar.pack(side="right", fill="y")
         # scrollbar 추가를 위해서 canvas 사용
         self.mainFrame = Canvas(master, width=width, bg='light salmon',
-                                 scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
-                                 yscrollcommand=self.mainScrollbar.set)
+                                scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+                                yscrollcommand=self.mainScrollbar.set)
         self.mainScrollbar.config(command=self.mainFrame.yview)
         self.mainFrame.pack(expand=True, side="top", fill="both")
 
