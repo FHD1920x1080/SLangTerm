@@ -5,7 +5,6 @@ from customCanvas import *
 from requestValue import *
 from utils import *
 
-from threading import Thread
 
 width = 1280
 height = 720
