@@ -4,7 +4,7 @@ from tkinter import font
 from customCanvas import *
 from requestValue import *
 from utils import *
-from threading import Thread
+
 
 width = 1280
 height = 720
@@ -16,6 +16,7 @@ class TkWindow:
     def __init__(self):
         global font12
         self.window = Tk()
+        SimpleViewCanvas.Window = self
         scaling_factor = get_windows_text_scaling()  # 윈도우 텍스트 배율 받아옴
         font12 = font.Font(size=int(12.0 / scaling_factor), family='Helvetica')  # font설정은 Tk()생성자 이후에만 할 수 있음. 불편...
         self.window.geometry(str(width) + "x" + str(height) + "+100+100")
@@ -28,6 +29,8 @@ class TkWindow:
         self.animalsNext = []  # 다음 10페이지 분량의 동물들
         self.animalsNextReady = False
         self.animalsPrevReady = False
+        self.interestAnimals = []
+        self.interestCanvases = []
         self.root = None
         self.totalCount = 0  # len(self.animals)과는 다름, 페이지와 상관없이 검색 조건에 해당되는 모든 동물의 수
         self.numOfPage = 16  # 한페이지에 표시할 수
@@ -40,10 +43,10 @@ class TkWindow:
 
         self.inquiryFrame = Canvas(self.window, bg='light salmon')
         self.TabBar.add(self.inquiryFrame, text="조회")
-        self.regiSearch = Frame(self.window, bg='light salmon')
-        self.TabBar.add(self.regiSearch, text="등록검색")
-        self.interestsFrame = Frame(self.window, bg='light salmon')
-        self.TabBar.add(self.interestsFrame, text="관심목록")
+        self.regiSearchFrame = Frame(self.window, bg='light salmon')
+        self.TabBar.add(self.regiSearchFrame, text="등록검색")
+        self.interestFrame = Canvas(self.window, bg='light salmon')
+        self.TabBar.add(self.interestFrame, text="관심목록")
         # 아래 tabChanged
         self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
         # 조회에 관한 실행
@@ -55,7 +58,7 @@ class TkWindow:
         # 등록검색에 관한 실행
 
         # 관심목록에 관한 실행
-
+        self.setInterestFrame(self.interestFrame)
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
         self.window.mainloop()
 
@@ -281,3 +284,14 @@ class TkWindow:
         self.nextButton.grid(row=0, column=2)
 
         return self.pageFrame
+
+    def setInterestFrame(self, master):
+        mainScrollbar = Scrollbar(master, orient="vertical")
+        mainScrollbar.pack(side="right", fill="y")
+        # scrollbar 추가를 위해서 canvas 사용
+        self.interestMainFrame = Canvas(master, width=width, bg='light salmon',
+                                scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+                                yscrollcommand=mainScrollbar.set)
+        mainScrollbar.config(command=self.interestMainFrame.yview)
+        self.interestMainFrame.pack(expand=True, side="top", fill="both")
+        return self.interestMainFrame

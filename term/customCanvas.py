@@ -9,7 +9,7 @@ import requests
 import io
 
 #지도 출력을 위한 모듈
-import threading
+from threading import Thread
 import sys
 import folium
 from cefpython3 import cefpython as cef
@@ -54,6 +54,8 @@ class SimpleViewCanvas:
     master_master = None
     master = None
     animal = None
+
+    Window = None
     def __init__(self, master):
         self.master_master = master.master
         self.master = master
@@ -75,8 +77,6 @@ class SimpleViewCanvas:
         self.careNm['text'] = animal.careNm
         self.careAddr['text'] = animal.careAddr
 
-
-
     def clearImage(self):
         self.image.configure(image='')
 
@@ -93,15 +93,26 @@ class SimpleViewCanvas:
         self.image.image = imgTk
         return True
 
+    def setHighImage(self, animal, ordPage, curPage):
+        imageGet = requests.get(animal.popfile, stream=True)
+        imageSet = imageGet.content
+        img = Image.open(io.BytesIO(imageSet))
+        img = img.resize((200, 200), Image.ANTIALIAS)
 
+        if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
+            return False
+        imgTk = ImageTk.PhotoImage(img)
+        self.image.configure(image=imgTk)
+        self.image.image = imgTk
+        return True
 
     def detailPage(self):
         print("detail")
         if tkWindow.popUpCanvas:
             tkWindow.popUpCanvas.destroy()
-        tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
-        tkWindow.popUpCanvas.setContent(self.animal)
-        tkWindow.popUpCanvas.setImage(self.animal, 0, 0)
+        tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, self.animal, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
+
+        Thread(target=lambda: tkWindow.popUpCanvas.setHighImage(self.animal, 0, 0)).start()
         #얘가 지도 그리기
         tkWindow.popUpCanvas.changeMap()
         pass
@@ -135,7 +146,7 @@ class GridViewCanvas(SimpleViewCanvas):
 
 
 class PopUpCanvas(SimpleViewCanvas):
-    def __init__(self, master, font, width=0, height=0, x=0, y=0):
+    def __init__(self, master, font, animal, width=0, height=0, x=0, y=0):
         super().__init__(master)
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='lightgray', width=width,
                              height=height)  # 스크롤바 두께만큼 작게함
@@ -145,25 +156,36 @@ class PopUpCanvas(SimpleViewCanvas):
         self.canvas.create_window(width - 20, 10, anchor="nw", window=self.exitButton)
         # self.image = None
         self.kindCd = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 10, anchor="nw", window=self.kindCd)
+        self.canvas.create_window(250, 10, anchor="nw", window=self.kindCd)
         self.age = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 40, anchor="nw", window=self.age)
+        self.canvas.create_window(250, 40, anchor="nw", window=self.age)
         self.careNm = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 70, anchor="nw", window=self.careNm)
+        self.canvas.create_window(250, 70, anchor="nw", window=self.careNm)
         self.careAddr = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 100, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(250, 100, anchor="nw", window=self.careAddr)
         self.image = Label(self.canvas, image='')
-        self.canvas.create_window(10, 130, anchor="nw", window=self.image)
+        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
+
+        self.setContent(animal)
+
+        size = len(self.Window.interestAnimals)
+        self.addButton = Button(text="관심 목록에 등록", font=font, command=self.addInterestAnimals)
+        self.canvas.create_window(250, 150, anchor="nw", window=self.addButton)
+        for i in range(size):
+            if self.Window.interestAnimals[i].filename == self.animal.filename:
+                self.addButton.configure(text="관심 목록에서 제거", command=lambda: self.removeInterestAnimals(i))
+                break
+
 
         #지도용 frame
         self.mapImage = Frame(self.canvas,width=tkWindow.width / 2, height=tkWindow.height * 1 / 3)
-        self.canvas.create_window(10,360,anchor="nw",window=self.mapImage)
+        self.canvas.create_window(10, 260, anchor="nw", window=self.mapImage)
         self.setUpMap()
     def setUpMap(self):
         imageGet = folium.Map(location=[33, 33], zoom_start=13)
         folium.Marker([33, 33], popup='보호중').add_to(imageGet)
         imageGet.save('map.html')
-        thread = threading.Thread(target=self.showMap, args=(self.mapImage,))
+        thread = Thread(target=self.showMap, args=(self.mapImage,))
         thread.daemon = True
         thread.start()
     def showMap(self,frame):
@@ -179,6 +201,24 @@ class PopUpCanvas(SimpleViewCanvas):
         folium.Marker([33, 33], popup='보호중').add_to(imageGet)
         imageGet.save('map.html')
         self.browser.Reload()
+    def addInterestAnimals(self):
+        canvas = ListViewCanvas(self.Window.interestMainFrame, tkWindow.font12, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
+        self.Window.interestAnimals.append(self.animal)
+        canvas.setContent(self.animal)
+        canvas.setImage(self.animal, 0, 0)
+        self.Window.interestCanvases.append(canvas)
+        self.addButton.configure(text="관심 목록에서 제거")
+        self.addButton.configure(command=lambda: self.removeInterestAnimals(len(self.Window.interestAnimals)-1))
+        pass
+    def removeInterestAnimals(self, i):
+        self.Window.interestAnimals.pop(i)
+        canvas = self.Window.interestCanvases.pop(i)
+        canvas.destroy()
+        for j in range(i, len(self.Window.interestAnimals)):
+            self.Window.interestMainFrame.create_window(0, (j)*400, anchor="nw", window=self.Window.interestCanvases[j].canvas)
+        self.addButton.configure(text="관심 목록에 등록")
+        self.addButton.configure(command=self.addInterestAnimals)
+        pass
 
 
 # 상세 보기 라벨, 이거 자체에 지도를
