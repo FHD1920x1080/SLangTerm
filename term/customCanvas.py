@@ -63,6 +63,9 @@ class SimpleViewCanvas:
     def destroy(self):
         self.canvas.destroy()
 
+    def state(self):
+        self.canvas.state()
+
     def clearContent(self):
         self.animal = None
         self.kindCd['text'] = ''
@@ -88,9 +91,13 @@ class SimpleViewCanvas:
 
         if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
             return False
-        imgTk = ImageTk.PhotoImage(img)
-        self.image.configure(image=imgTk)
-        self.image.image = imgTk
+        try:
+            imgTk = ImageTk.PhotoImage(img)
+            self.image.configure(image=imgTk)
+            self.image.image = imgTk
+        except:
+            print("없는 캔버스에 이미지 적용 시도함")
+            return False
         return True
 
     def setHighImage(self, animal, ordPage, curPage):
@@ -101,20 +108,24 @@ class SimpleViewCanvas:
 
         if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
             return False
-        imgTk = ImageTk.PhotoImage(img)
-        self.image.configure(image=imgTk)
-        self.image.image = imgTk
+        try:
+            imgTk = ImageTk.PhotoImage(img)
+            self.image.configure(image=imgTk)
+            self.image.image = imgTk
+        except:
+            print("없는 캔버스에 이미지 적용 시도함")
+            return False
         return True
 
-    def detailPage(self):
+    def printPopUp(self):
         print("detail")
         if tkWindow.popUpCanvas:
             tkWindow.popUpCanvas.destroy()
-        tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font12, self.animal, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
+        tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font10, self.animal, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
 
         Thread(target=lambda: tkWindow.popUpCanvas.setHighImage(self.animal, 0, 0)).start()
         #얘가 지도 그리기
-        tkWindow.popUpCanvas.changeMap()
+        #tkWindow.popUpCanvas.changeMap()
         pass
 
 
@@ -138,7 +149,7 @@ class ListViewCanvas(SimpleViewCanvas):
         self.canvas.create_window(10, 130, anchor="nw", window=self.image)
 
         # 사진 클릭으로 동물에 대한 자세한 출력
-        self.image.bind("<Button-1>", lambda event: self.detailPage())
+        self.image.bind("<Button-1>", lambda event: self.printPopUp())
 
 
 class GridViewCanvas(SimpleViewCanvas):
@@ -170,7 +181,7 @@ class PopUpCanvas(SimpleViewCanvas):
 
         size = len(self.Window.interestAnimals)
         self.addButton = Button(text="관심 목록에 등록", font=font, command=self.addInterestAnimals)
-        self.canvas.create_window(240, 150, anchor="nw", window=self.addButton)
+        self.canvas.create_window(240, 130, anchor="nw", window=self.addButton)
         for i in range(size):
             if self.Window.interestAnimals[i].filename == self.animal.filename:
                 self.addButton.configure(text="관심 목록에서 제거", command=lambda: self.removeInterestAnimals(i))
@@ -180,7 +191,7 @@ class PopUpCanvas(SimpleViewCanvas):
         #지도용 frame
         self.mapImage = Frame(self.canvas,width=width, height=height * 2 / 3)
         self.canvas.create_window(5, 250, anchor="nw", window=self.mapImage)
-        self.setUpMap()
+        # self.setUpMap()
     def setUpMap(self):
         imageGet = folium.Map(location=[33, 33], zoom_start=13)
         folium.Marker([33, 33], popup='보호중').add_to(imageGet)
@@ -202,10 +213,10 @@ class PopUpCanvas(SimpleViewCanvas):
         imageGet.save('map.html')
         self.browser.Reload()
     def addInterestAnimals(self):
-        canvas = ListViewCanvas(self.Window.interestMainFrame, tkWindow.font12, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
+        canvas = ListViewCanvas(self.Window.interestMainFrame, tkWindow.font10, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
         self.Window.interestAnimals.append(self.animal)
         canvas.setContent(self.animal)
-        canvas.setImage(self.animal, 0, 0)
+        Thread(target=lambda: canvas.setImage(self.animal, 0, 0)).start()
         self.Window.interestCanvases.append(canvas)
         self.addButton.configure(text="관심 목록에서 제거")
         self.addButton.configure(command=lambda: self.removeInterestAnimals(len(self.Window.interestAnimals)-1))

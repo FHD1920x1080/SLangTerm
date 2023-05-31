@@ -10,3 +10,75 @@
     self.tk.mainloop(n)
 KeyboardInterrupt
 
+
+[2023-05-30 11:41:38] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
+
+[2023-05-30 11:44:57] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
+
+[2023-05-30 11:57:28] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
+
+[2023-05-30 11:58:16] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
+
+[2023-05-30 11:58:36] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
+
+[2023-05-30 12:00:45] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
