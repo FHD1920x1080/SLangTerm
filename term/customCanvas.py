@@ -213,7 +213,7 @@ class PopUpCanvas(SimpleViewCanvas):
         pass
 
     def addInterestAnimals(self):
-        canvas = ListViewCanvas(self.Window.interestMainFrame, tkWindow.font10, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
+        canvas = ListViewCanvas(self.Window.interestMainCanvas, tkWindow.font10, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
         self.Window.interestAnimals.append(self.animal)
         canvas.setContent(self.animal)
         Thread(target=lambda: canvas.setImage(self.animal)).start()
@@ -226,7 +226,7 @@ class PopUpCanvas(SimpleViewCanvas):
         canvas = self.Window.interestCanvases.pop(i)
         canvas.destroy()
         for j in range(i, len(self.Window.interestAnimals)):
-            self.Window.interestMainFrame.create_window(0, (j)*400, anchor="nw", window=self.Window.interestCanvases[j].canvas)
+            self.Window.interestMainCanvas.create_window(0, (j) * 400, anchor="nw", window=self.Window.interestCanvases[j].canvas)
         self.addButton.configure(text="관심 목록에 등록")
         self.addButton.configure(command=self.addInterestAnimals)
         pass

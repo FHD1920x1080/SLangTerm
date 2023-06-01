@@ -41,25 +41,25 @@ class TkWindow:
         self.TabBar = tkinter.ttk.Notebook(self.rootCanvas)
         self.TabBar.pack(side="top", expand=True, fill="both")
 
-        self.inquiryFrame = Canvas(self.rootCanvas, bg='light salmon')
-        self.TabBar.add(self.inquiryFrame, text="조회")
-        self.regiSearchFrame = Canvas(self.rootCanvas, bg='light salmon')
-        self.TabBar.add(self.regiSearchFrame, text="등록검색")
-        self.interestFrame = Canvas(self.rootCanvas, bg='light salmon')
-        self.TabBar.add(self.interestFrame, text="관심목록")
+        self.inquiryCanvas = Canvas(self.rootCanvas, bg='light salmon')
+        self.TabBar.add(self.inquiryCanvas, text="조회")
+        self.regiSearchCanvas = Canvas(self.rootCanvas, bg='light salmon')
+        self.TabBar.add(self.regiSearchCanvas, text="등록검색")
+        self.interestCanvas = Canvas(self.rootCanvas, bg='light salmon')
+        self.TabBar.add(self.interestCanvas, text="관심목록")
         # 아래 tabChanged
         self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
         # 조회에 관한 실행
 
-        self.setCategoriFrame(self.inquiryFrame)
-        self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
-        self.setPageFrame(self.inquiryFrame)
+        self.setCategoriCanvas(self.inquiryCanvas)
+        self.setMainCanvas(self.inquiryCanvas)  # selectViewMode Notebook 추가 예정
+        self.setPageCanvas(self.inquiryCanvas)
         #self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행
 
         # 관심목록에 관한 실행
-        self.setInterestFrame(self.interestFrame)
+        self.setInterestFrame(self.interestCanvas)
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
         self.popUpCanvas = PopUpCanvas(self.rootCanvas, font10, width=width / 2, height=height * 2 / 3, x=width / 4, y=height / 5.5)
 
@@ -223,7 +223,7 @@ class TkWindow:
         self.printListView()
         Thread(target=self.loadCurPageThumbnail).start()
 
-    def setCategoriFrame(self, master):
+    def setCategoriCanvas(self, master):
         self.categoryFrame = Frame(master)
         self.categoryFrame.pack()
 
@@ -259,24 +259,24 @@ class TkWindow:
 
         return self.categoryFrame
 
-    def setMainFrame(self, master):
+    def setMainCanvas(self, master):
         self.mainScrollbar = Scrollbar(master, orient="vertical")
         self.mainScrollbar.pack(side="right", fill="y")
         # scrollbar 추가를 위해서 canvas 사용
-        self.mainFrame = Canvas(master, width=width, bg='light salmon',
-                                scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
-                                yscrollcommand=self.mainScrollbar.set)
-        self.mainScrollbar.config(command=self.mainFrame.yview)
-        self.mainFrame.pack(expand=True, side="top", fill="both")
+        self.mainCanvas = Canvas(master, width=width, bg='light salmon',
+                                 scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+                                 yscrollcommand=self.mainScrollbar.set)
+        self.mainScrollbar.config(command=self.mainCanvas.yview)
+        self.mainCanvas.pack(expand=True, side="top", fill="both")
 
         # canvas내에 create_window를 해야 scroll이 가능 일일히 좌표 계산을 해야함
         for i in range(self.numOfPage):
-            label = ListViewCanvas(self.mainFrame, font10, width=width, height=400, x=0, y=i * 400)
+            label = ListViewCanvas(self.mainCanvas, font10, width=width, height=400, x=0, y=i * 400)
             self.ListViewCanvases.append(label)
 
-        return self.mainFrame
+        return self.mainCanvas
 
-    def setPageFrame(self, master):
+    def setPageCanvas(self, master):
         self.pageFrame = Frame(master)
         self.pageFrame.pack(side="bottom")
         self.prevButton = Button(self.pageFrame, font=font10, text='이전', command=self.prevPage)
@@ -292,9 +292,9 @@ class TkWindow:
         mainScrollbar = Scrollbar(master, orient="vertical")
         mainScrollbar.pack(side="right", fill="y")
         # scrollbar 추가를 위해서 canvas 사용
-        self.interestMainFrame = Canvas(master, width=width, bg='light salmon',
-                                scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
-                                yscrollcommand=mainScrollbar.set)
-        mainScrollbar.config(command=self.interestMainFrame.yview)
-        self.interestMainFrame.pack(expand=True, side="top", fill="both")
-        return self.interestMainFrame
+        self.interestMainCanvas = Canvas(master, width=width, bg='light salmon',
+                                         scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+                                         yscrollcommand=mainScrollbar.set)
+        mainScrollbar.config(command=self.interestMainCanvas.yview)
+        self.interestMainCanvas.pack(expand=True, side="top", fill="both")
+        return self.interestMainCanvas
