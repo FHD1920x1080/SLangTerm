@@ -3,13 +3,12 @@ import tkinter.ttk
 from tkinter import font
 from customCanvas import *
 from requestValue import *
-from utils import *
+
 
 
 width = 1024
 height = 768
 font10 = None
-popUpCanvas = None
 
 # 텍스트 배율 가져오기
 class TkWindow:
@@ -22,7 +21,8 @@ class TkWindow:
         self.window.geometry(str(width) + "x" + str(height) + "+100+100")
         self.window.title("타이틀이름")
         self.window.configure(bg='light salmon')
-
+        self.rootCanvas = Canvas(self.window, bg='light salmon')
+        self.rootCanvas.pack( expand=True, fill="both")
         self.ListViewCanvases = []
         self.animals = []
         self.animalsPrev = []  # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
@@ -38,18 +38,19 @@ class TkWindow:
         self.lastPage = 1
         self.rqValue = RequestValue(self.numOfPage)  # 페이지의 10배만큼 읽음.
 
-        self.TabBar = tkinter.ttk.Notebook(self.window)
+        self.TabBar = tkinter.ttk.Notebook(self.rootCanvas)
         self.TabBar.pack(side="top", expand=True, fill="both")
 
-        self.inquiryFrame = Canvas(self.window, bg='light salmon')
+        self.inquiryFrame = Canvas(self.rootCanvas, bg='light salmon')
         self.TabBar.add(self.inquiryFrame, text="조회")
-        self.regiSearchFrame = Frame(self.window, bg='light salmon')
+        self.regiSearchFrame = Canvas(self.rootCanvas, bg='light salmon')
         self.TabBar.add(self.regiSearchFrame, text="등록검색")
-        self.interestFrame = Canvas(self.window, bg='light salmon')
+        self.interestFrame = Canvas(self.rootCanvas, bg='light salmon')
         self.TabBar.add(self.interestFrame, text="관심목록")
         # 아래 tabChanged
         self.TabBar.bind("<<NotebookTabChanged>>", self.tabChanged)
         # 조회에 관한 실행
+
         self.setCategoriFrame(self.inquiryFrame)
         self.setMainFrame(self.inquiryFrame)  # selectViewMode Notebook 추가 예정
         self.setPageFrame(self.inquiryFrame)
@@ -60,6 +61,8 @@ class TkWindow:
         # 관심목록에 관한 실행
         self.setInterestFrame(self.interestFrame)
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
+        self.popUpCanvas = PopUpCanvas(self.rootCanvas, font10, width=width / 2, height=height * 2 / 3, x=width / 4, y=height / 5.5)
+
         self.window.mainloop()
 
     # tab변경 시 화면 변경

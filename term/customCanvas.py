@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import font
 from animal import *
+from utils import *
 import tkWindow
 
 # 이미지 출력을 위한 모듈
@@ -51,14 +52,13 @@ class SimpleViewCanvas:
     totalCount = None  # 전체 결과 수
     canvas = None
     image = None
-    master_master = None
     master = None
     animal = None
 
     Window = None
     def __init__(self, master):
-        self.master_master = master.master
         self.master = master
+        self.animal = None
 
     def destroy(self):
         self.canvas.destroy()
@@ -83,7 +83,7 @@ class SimpleViewCanvas:
     def clearImage(self):
         self.image.configure(image='')
 
-    def setImage(self, animal, ordPage, curPage):
+    def setImage(self, animal, ordPage=0, curPage=0):
         imageGet = requests.get(animal.filename, stream=True)
         imageSet = imageGet.content
         img = Image.open(io.BytesIO(imageSet))
@@ -100,7 +100,7 @@ class SimpleViewCanvas:
             return False
         return True
 
-    def setHighImage(self, animal, ordPage, curPage):
+    def setHighImage(self, animal, ordPage=0, curPage=0):
         imageGet = requests.get(animal.popfile, stream=True)
         imageSet = imageGet.content
         img = Image.open(io.BytesIO(imageSet))
@@ -116,17 +116,6 @@ class SimpleViewCanvas:
             print("없는 캔버스에 이미지 적용 시도함")
             return False
         return True
-
-    def printPopUp(self):
-        print("detail")
-        if tkWindow.popUpCanvas:
-            tkWindow.popUpCanvas.destroy()
-        tkWindow.popUpCanvas = PopUpCanvas(self.master_master, tkWindow.font10, self.animal, width=tkWindow.width / 2, height=tkWindow.height * 2 / 3, x=tkWindow.width / 4, y=tkWindow.height / 5.5)
-
-        Thread(target=lambda: tkWindow.popUpCanvas.setHighImage(self.animal, 0, 0)).start()
-        #얘가 지도 그리기
-        #tkWindow.popUpCanvas.changeMap()
-        pass
 
 
 class ListViewCanvas(SimpleViewCanvas):
@@ -149,7 +138,7 @@ class ListViewCanvas(SimpleViewCanvas):
         self.canvas.create_window(10, 130, anchor="nw", window=self.image)
 
         # 사진 클릭으로 동물에 대한 자세한 출력
-        self.image.bind("<Button-1>", lambda event: self.printPopUp())
+        self.image.bind("<Button-1>", lambda event: self.Window.popUpCanvas.show(self.animal))
 
 
 class GridViewCanvas(SimpleViewCanvas):
@@ -157,13 +146,15 @@ class GridViewCanvas(SimpleViewCanvas):
 
 
 class PopUpCanvas(SimpleViewCanvas):
-    def __init__(self, master, font, animal, width=0, height=0, x=0, y=0):
+    def __init__(self, master, font, width=0, height=0, x=0, y=0):
         super().__init__(master)
+        self.x = x
+        self.y = y
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='lightgray', width=width,
                              height=height)  # 스크롤바 두께만큼 작게함
-        master.create_window(x, y, anchor="nw", window=self.canvas)
-
-        self.exitButton = Button(text=" X ", command=self.destroy)
+        #self.hide()
+        self.hide()
+        self.exitButton = Button(text=" X ", command=self.hide)
         self.canvas.create_window(width - 20, 10, anchor="nw", window=self.exitButton)
         # self.image = None
         self.kindCd = Label(self.canvas, font=font, text='', height=1, bg='cyan')
@@ -177,46 +168,55 @@ class PopUpCanvas(SimpleViewCanvas):
         self.image = Label(self.canvas, image='')
         self.canvas.create_window(10, 10, anchor="nw", window=self.image)
 
-        self.setContent(animal)
 
+        self.addButton = Button(text="", font=font)
+
+        #지도용 frame
+        self.mapFrame = Frame(self.canvas,width=width, height=height * 2 / 3)
+        self.canvas.create_window(5, 250, anchor="nw", window=self.mapFrame)
+        thread = Thread(target=self.setMap)
+        thread.start()
+    def hide(self):
+        self.master.create_window(-2000, -2000, anchor="nw", window=self.canvas)# 그냥 이상한데 숨기는거임
+        pass
+
+    def show(self, animal):
+        self.animal = animal
+        self.setContent(self.animal)
+        self.clearImage()
+        thread1 = Thread(target=lambda: self.setHighImage(self.animal))
+        thread1.start()
+        thread2 = Thread(target=self.changeMap)
+        thread2.start()
+        #버튼 체크
         size = len(self.Window.interestAnimals)
-        self.addButton = Button(text="관심 목록에 등록", font=font, command=self.addInterestAnimals)
+        self.addButton.configure(text="관심 목록에 등록", command=self.addInterestAnimals)
         self.canvas.create_window(240, 130, anchor="nw", window=self.addButton)
         for i in range(size):
             if self.Window.interestAnimals[i].filename == self.animal.filename:
                 self.addButton.configure(text="관심 목록에서 제거", command=lambda: self.removeInterestAnimals(i))
                 break
+        self.master.create_window(self.x, self.y, anchor="nw", window=self.canvas)
 
 
-        #지도용 frame
-        self.mapImage = Frame(self.canvas,width=width, height=height * 2 / 3)
-        self.canvas.create_window(5, 250, anchor="nw", window=self.mapImage)
-        # self.setUpMap()
-    def setUpMap(self):
-        imageGet = folium.Map(location=[33, 33], zoom_start=13)
-        folium.Marker([33, 33], popup='보호중').add_to(imageGet)
-        imageGet.save('map.html')
-        thread = Thread(target=self.showMap, args=(self.mapImage,))
-        thread.daemon = True
-        thread.start()
-    def showMap(self,frame):
+    def setMap(self):
         sys.excepthook = cef.ExceptHook
-        window_info = cef.WindowInfo(frame.winfo_id())
-        window_info.SetAsChild(frame.winfo_id(), [0, 0, tkWindow.width / 2, tkWindow.height * 1 / 2])
+        window_info = cef.WindowInfo(self.mapFrame.winfo_id())
+        window_info.SetAsChild(self.mapFrame.winfo_id(), [0, 0, 600, 400])
         cef.Initialize()
-        self.browser = cef.CreateBrowserSync(window_info, url='https://map.kakao.com/')
+        self.browser = cef.CreateBrowserSync(window_info, url="https://www.google.com/")
         cef.MessageLoop()
+
     def changeMap(self):
-        #동물의 좌표값 필요
-        imageGet = folium.Map(location=[44, 44], zoom_start=13)
-        folium.Marker([33, 33], popup='보호중').add_to(imageGet)
-        imageGet.save('map.html')
-        self.browser.Reload()
+        #여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
+        self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/")#sample
+        pass
+
     def addInterestAnimals(self):
         canvas = ListViewCanvas(self.Window.interestMainFrame, tkWindow.font10, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
         self.Window.interestAnimals.append(self.animal)
         canvas.setContent(self.animal)
-        Thread(target=lambda: canvas.setImage(self.animal, 0, 0)).start()
+        Thread(target=lambda: canvas.setImage(self.animal)).start()
         self.Window.interestCanvases.append(canvas)
         self.addButton.configure(text="관심 목록에서 제거")
         self.addButton.configure(command=lambda: self.removeInterestAnimals(len(self.Window.interestAnimals)-1))
