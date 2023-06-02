@@ -106,14 +106,15 @@ class SimpleViewCanvas:
         self.image.configure(image='')
 
     def setImage(self, animal, ordPage=0, curPage=0):
+        if ordPage != curPage:
+            return False
         imageGet = requests.get(animal.filename, stream=True)
-        imageSet = imageGet.content
-        img = Image.open(io.BytesIO(imageSet))
-        img = img.resize((S_IMAGE_SIZE, S_IMAGE_SIZE), Image.ANTIALIAS)
-
-        if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
+        if ordPage != curPage: # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
             return False
         try:
+            imageSet = imageGet.content
+            img = Image.open(io.BytesIO(imageSet))
+            img = img.resize((S_IMAGE_SIZE, S_IMAGE_SIZE), Image.ANTIALIAS)
             imgTk = ImageTk.PhotoImage(img)
             self.image.configure(image=imgTk)
             self.image.image = imgTk
@@ -123,14 +124,15 @@ class SimpleViewCanvas:
         return True
 
     def setHighImage(self, animal, ordPage=0, curPage=0):
+        if ordPage != curPage:
+            return False
         imageGet = requests.get(animal.popfile, stream=True)
-        imageSet = imageGet.content
-        img = Image.open(io.BytesIO(imageSet))
-        img = img.resize((L_IMAGE_SIZE, L_IMAGE_SIZE), Image.ANTIALIAS)
-
-        if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
+        if ordPage != curPage:  # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
             return False
         try:
+            imageSet = imageGet.content
+            img = Image.open(io.BytesIO(imageSet))
+            img = img.resize((L_IMAGE_SIZE, L_IMAGE_SIZE), Image.ANTIALIAS)
             imgTk = ImageTk.PhotoImage(img)
             self.image.configure(image=imgTk)
             self.image.image = imgTk
@@ -248,7 +250,7 @@ class PopUpCanvas(SimpleViewCanvas):
 
     def changeMap(self):
         # 여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
-        self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/")  # sample
+        self.browser.GetMainFrame().LoadUrl("https://map.naver.com/"+"v5/search/"+self.animal.careNm)  # sample
         pass
 
     def addInterestAnimals(self):
