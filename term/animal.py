@@ -43,3 +43,10 @@ class Animal:
 
     def getSimpleData(self):
         return self.kindCd + "   " + self.age + "   " + self.careNm + "   " + self.careAddr
+
+    def isSame(self, animal):
+        if self is animal:
+            return True
+        if self.filename == animal.filename:
+            return True
+        return False

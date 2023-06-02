@@ -15,7 +15,13 @@ import sys
 import folium
 from cefpython3 import cefpython as cef
 
-
+WINDOW_WIDTH = 1200
+WINDOW_HEIGHT = 900
+FONT10 = None
+FONT12 = None
+FONT14 = None
+FONT16 = None
+LIST_VIEW_HEIGHT = 220
 
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
@@ -104,7 +110,7 @@ class SimpleViewCanvas:
         imageGet = requests.get(animal.popfile, stream=True)
         imageSet = imageGet.content
         img = Image.open(io.BytesIO(imageSet))
-        img = img.resize((200, 200), Image.ANTIALIAS)
+        img = img.resize((300, 300), Image.ANTIALIAS)
 
         if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
             return False
@@ -119,23 +125,24 @@ class SimpleViewCanvas:
 
 
 class ListViewCanvas(SimpleViewCanvas):
-    def __init__(self, master, font, width=0, height=0, x=0, y=0):
+    def __init__(self, master, width=0, height=0, x=0, y=0):
         super().__init__(master)
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width - 40,
                              height=height)  # 스크롤바 두께만큼 작게함
-        master.create_window(x, y, anchor="nw", window=self.canvas)
+        self.master.create_window(x, y, anchor="nw", window=self.canvas)
 
-        # self.image = None
-        self.kindCd = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 10, anchor="nw", window=self.kindCd)
-        self.age = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 40, anchor="nw", window=self.age)
-        self.careNm = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 70, anchor="nw", window=self.careNm)
-        self.careAddr = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(10, 100, anchor="nw", window=self.careAddr)
+        # X 라벨 배치
         self.image = Label(self.canvas, image='')
-        self.canvas.create_window(10, 130, anchor="nw", window=self.image)
+        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
+        self.kindCd = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(230, 10, anchor="nw", window=self.kindCd)
+        self.age = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(230, 40, anchor="nw", window=self.age)
+        self.careNm = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(230, 70, anchor="nw", window=self.careNm)
+        self.careAddr = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(230, 100, anchor="nw", window=self.careAddr)
+
 
         # 사진 클릭으로 동물에 대한 자세한 출력
         self.image.bind("<Button-1>", lambda event: self.Window.popUpCanvas.show(self.animal))
@@ -146,34 +153,37 @@ class GridViewCanvas(SimpleViewCanvas):
 
 
 class PopUpCanvas(SimpleViewCanvas):
-    def __init__(self, master, font, width=0, height=0, x=0, y=0):
+    def __init__(self, master, width=0, height=0, x=0, y=0):
         super().__init__(master)
         self.x = x
         self.y = y
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='lightgray', width=width,
                              height=height)  # 스크롤바 두께만큼 작게함
-        #self.hide()
+        # X 버튼
         self.hide()
         self.exitButton = Button(text=" X ", command=self.hide)
-        self.canvas.create_window(width - 20, 10, anchor="nw", window=self.exitButton)
-        # self.image = None
-        self.kindCd = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(240, 10, anchor="nw", window=self.kindCd)
-        self.age = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(240, 40, anchor="nw", window=self.age)
-        self.careNm = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(240, 70, anchor="nw", window=self.careNm)
-        self.careAddr = Label(self.canvas, font=font, text='', height=1, bg='cyan')
-        self.canvas.create_window(240, 100, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(width - 23, 10, anchor="nw", window=self.exitButton)
+
+        # X 라벨 배치
         self.image = Label(self.canvas, image='')
         self.canvas.create_window(10, 10, anchor="nw", window=self.image)
+        self.kindCd = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(330, 10, anchor="nw", window=self.kindCd)
+        self.age = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(330, 40, anchor="nw", window=self.age)
+        self.careNm = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(330, 70, anchor="nw", window=self.careNm)
+        self.careAddr = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(330, 100, anchor="nw", window=self.careAddr)
 
-
-        self.addButton = Button(text="", font=font)
+        # 목록 추가 제거 버튼
+        self.addButton = Button(text="", font=FONT10)
+        self.canvas.create_window(330, 130, anchor="nw", window=self.addButton)
 
         #지도용 frame
-        self.mapFrame = Frame(self.canvas,width=width, height=height * 2 / 3)
-        self.canvas.create_window(5, 250, anchor="nw", window=self.mapFrame)
+        map_height = height - 320 + 5 # 왜 5를 더해야 맞는지는 모르겠음
+        self.mapFrame = Frame(self.canvas, width=width, height=map_height)
+        self.canvas.create_window(5, 320, anchor="nw", window=self.mapFrame)
         thread = Thread(target=self.setMap)
         thread.start()
     def hide(self):
@@ -188,21 +198,23 @@ class PopUpCanvas(SimpleViewCanvas):
         thread1.start()
         thread2 = Thread(target=self.changeMap)
         thread2.start()
-        #버튼 체크
-        size = len(self.Window.interestAnimals)
-        self.addButton.configure(text="관심 목록에 등록", command=self.addInterestAnimals)
-        self.canvas.create_window(240, 130, anchor="nw", window=self.addButton)
-        for i in range(size):
-            if self.Window.interestAnimals[i].filename == self.animal.filename:
+
+        #버튼 정하기
+        found = False
+        for i in range(len(self.Window.interestAnimals)):
+            if self.animal.isSame(self.Window.interestAnimals[i]):
+                found = True
                 self.addButton.configure(text="관심 목록에서 제거", command=lambda: self.removeInterestAnimals(i))
                 break
+        if not found:
+            self.addButton.configure(text="관심 목록에 등록", command=self.addInterestAnimals)
         self.master.create_window(self.x, self.y, anchor="nw", window=self.canvas)
 
 
     def setMap(self):
         sys.excepthook = cef.ExceptHook
         window_info = cef.WindowInfo(self.mapFrame.winfo_id())
-        window_info.SetAsChild(self.mapFrame.winfo_id(), [0, 0, 600, 400])
+        window_info.SetAsChild(self.mapFrame.winfo_id(), [0, 0, self.mapFrame['width'], self.mapFrame['height']])
         cef.Initialize()
         self.browser = cef.CreateBrowserSync(window_info, url="https://www.google.com/")
         cef.MessageLoop()
@@ -213,11 +225,13 @@ class PopUpCanvas(SimpleViewCanvas):
         pass
 
     def addInterestAnimals(self):
-        canvas = ListViewCanvas(self.Window.interestMainCanvas, tkWindow.font10, width=tkWindow.width, height=400, x=0, y=len(self.Window.interestAnimals) * 400)
-        self.Window.interestAnimals.append(self.animal)
+        self.Window.interestAnimals.insert(0, self.animal)
+        canvas = ListViewCanvas(self.Window.interestMainCanvas, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, x=0, y=0)
         canvas.setContent(self.animal)
+        self.Window.interestCanvases.insert(0, canvas)
+        for j in range(1, len(self.Window.interestCanvases)):
+            self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
         Thread(target=lambda: canvas.setImage(self.animal)).start()
-        self.Window.interestCanvases.append(canvas)
         self.addButton.configure(text="관심 목록에서 제거")
         self.addButton.configure(command=lambda: self.removeInterestAnimals(len(self.Window.interestAnimals)-1))
         pass
@@ -225,8 +239,8 @@ class PopUpCanvas(SimpleViewCanvas):
         self.Window.interestAnimals.pop(i)
         canvas = self.Window.interestCanvases.pop(i)
         canvas.destroy()
-        for j in range(i, len(self.Window.interestAnimals)):
-            self.Window.interestMainCanvas.create_window(0, (j) * 400, anchor="nw", window=self.Window.interestCanvases[j].canvas)
+        for j in range(i, len(self.Window.interestCanvases)):
+            self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
         self.addButton.configure(text="관심 목록에 등록")
         self.addButton.configure(command=self.addInterestAnimals)
         pass

@@ -4,21 +4,18 @@ from tkinter import font
 from customCanvas import *
 from requestValue import *
 
-
-
-width = 1024
-height = 768
-font10 = None
-
 # 텍스트 배율 가져오기
 class TkWindow:
     def __init__(self):
-        global font10
+        global FONT10, FONT12, FONT14, FONT16
         self.window = Tk()
         SimpleViewCanvas.Window = self
         scaling_factor = get_windows_text_scaling()  # 윈도우 텍스트 배율 받아옴
-        font10 = font.Font(size=int(10.0 / scaling_factor), family='Helvetica')  # font설정은 Tk()생성자 이후에만 할 수 있음. 불편...
-        self.window.geometry(str(width) + "x" + str(height) + "+100+100")
+        FONT10 = font.Font(size=int(10.0 / scaling_factor), family='Helvetica')  # font설정은 Tk()생성자 이후에만 할 수 있음. 불편...
+        FONT12 = font.Font(size=int(12.0 / scaling_factor), family='Helvetica')
+        FONT14 = font.Font(size=int(14.0 / scaling_factor), family='Helvetica')
+        FONT16 = font.Font(size=int(16.0 / scaling_factor), family='Helvetica')
+        self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+100")
         self.window.title("타이틀이름")
         self.window.configure(bg='light salmon')
         self.rootCanvas = Canvas(self.window, bg='light salmon')
@@ -61,7 +58,7 @@ class TkWindow:
         # 관심목록에 관한 실행
         self.setInterestFrame(self.interestCanvas)
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
-        self.popUpCanvas = PopUpCanvas(self.rootCanvas, font10, width=width / 2, height=height * 2 / 3, x=width / 4, y=height / 5.5)
+        self.popUpCanvas = PopUpCanvas(self.rootCanvas, width=WINDOW_WIDTH * 2 / 3, height=WINDOW_HEIGHT * 0.88, x=WINDOW_WIDTH * 1 / 3 * 0.5, y=WINDOW_HEIGHT * 0.05)
 
         self.window.mainloop()
 
@@ -228,33 +225,33 @@ class TkWindow:
         self.categoryFrame.pack()
 
         row_count = 0
-        Label(self.categoryFrame, font=font10, text='검색 시작일', width=10).grid(row=row_count, column=0)
-        Entry(self.categoryFrame, font=font10, textvariable=self.rqValue.bgnde, justify=RIGHT, width=10).grid(
+        Label(self.categoryFrame, font=FONT10, text='검색 시작일', width=10).grid(row=row_count, column=0)
+        Entry(self.categoryFrame, font=FONT10, textvariable=self.rqValue.bgnde, justify=RIGHT, width=10).grid(
             row=row_count, column=1)
-        Label(self.categoryFrame, font=font10, text='검색 종료일', width=10).grid(row=row_count, column=2)
-        Entry(self.categoryFrame, font=font10, textvariable=self.rqValue.endde, justify=RIGHT, width=10).grid(
+        Label(self.categoryFrame, font=FONT10, text='검색 종료일', width=10).grid(row=row_count, column=2)
+        Entry(self.categoryFrame, font=FONT10, textvariable=self.rqValue.endde, justify=RIGHT, width=10).grid(
             row=row_count, column=3)
         row_count += 1
 
-        Radiobutton(self.categoryFrame, font=font10, text='전체', variable=self.rqValue.upkind, value=' ',
+        Radiobutton(self.categoryFrame, font=FONT10, text='전체', variable=self.rqValue.upkind, value=' ',
                     command=self.disablePrevNext).grid(row=row_count, column=0)
-        Radiobutton(self.categoryFrame, font=font10, text='개', variable=self.rqValue.upkind, value='417000',
+        Radiobutton(self.categoryFrame, font=FONT10, text='개', variable=self.rqValue.upkind, value='417000',
                     command=self.disablePrevNext).grid(row=row_count, column=1)
-        Radiobutton(self.categoryFrame, font=font10, text='고양이', variable=self.rqValue.upkind, value='422400',
+        Radiobutton(self.categoryFrame, font=FONT10, text='고양이', variable=self.rqValue.upkind, value='422400',
                     command=self.disablePrevNext).grid(row=row_count, column=2)
-        Radiobutton(self.categoryFrame, font=font10, text='기타', variable=self.rqValue.upkind, value='429900',
+        Radiobutton(self.categoryFrame, font=FONT10, text='기타', variable=self.rqValue.upkind, value='429900',
                     command=self.disablePrevNext).grid(row=row_count, column=3)
         row_count += 1
 
-        Radiobutton(self.categoryFrame, font=font10, text='전체', variable=self.rqValue.state, value=' ',
+        Radiobutton(self.categoryFrame, font=FONT10, text='전체', variable=self.rqValue.state, value=' ',
                     command=self.disablePrevNext).grid(row=row_count, column=0)
-        Radiobutton(self.categoryFrame, font=font10, text='공고중', variable=self.rqValue.state, value='notice',
+        Radiobutton(self.categoryFrame, font=FONT10, text='공고중', variable=self.rqValue.state, value='notice',
                     command=self.disablePrevNext).grid(row=row_count, column=1)
-        Radiobutton(self.categoryFrame, font=font10, text='보호중', variable=self.rqValue.state, value='protect',
+        Radiobutton(self.categoryFrame, font=FONT10, text='보호중', variable=self.rqValue.state, value='protect',
                     command=self.disablePrevNext).grid(row=row_count, column=2)
         row_count += 1
 
-        self.setAndPrintButton = Button(self.categoryFrame, font=font10, text='출력', command=self.setAndPrint)
+        self.setAndPrintButton = Button(self.categoryFrame, font=FONT10, text='출력', command=self.setAndPrint)
         self.setAndPrintButton.grid(row=row_count, column=0)
 
         return self.categoryFrame
@@ -263,15 +260,15 @@ class TkWindow:
         self.mainScrollbar = Scrollbar(master, orient="vertical")
         self.mainScrollbar.pack(side="right", fill="y")
         # scrollbar 추가를 위해서 canvas 사용
-        self.mainCanvas = Canvas(master, width=width, bg='light salmon',
-                                 scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+        self.mainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon',
+                                 scrollregion=(0, 0, 0, LIST_VIEW_HEIGHT * self.numOfPage + 12),
                                  yscrollcommand=self.mainScrollbar.set)
         self.mainScrollbar.config(command=self.mainCanvas.yview)
         self.mainCanvas.pack(expand=True, side="top", fill="both")
 
         # canvas내에 create_window를 해야 scroll이 가능 일일히 좌표 계산을 해야함
         for i in range(self.numOfPage):
-            label = ListViewCanvas(self.mainCanvas, font10, width=width, height=400, x=0, y=i * 400)
+            label = ListViewCanvas(self.mainCanvas, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, x=0, y=i * LIST_VIEW_HEIGHT)
             self.ListViewCanvases.append(label)
 
         return self.mainCanvas
@@ -279,11 +276,11 @@ class TkWindow:
     def setPageCanvas(self, master):
         self.pageFrame = Frame(master)
         self.pageFrame.pack(side="bottom")
-        self.prevButton = Button(self.pageFrame, font=font10, text='이전', command=self.prevPage)
+        self.prevButton = Button(self.pageFrame, font=FONT10, text='이전', command=self.prevPage)
         self.prevButton.grid(row=0, column=0)
-        self.pageLabel = Label(self.pageFrame, font=font10, text=str(self.curPage), width=8)
+        self.pageLabel = Label(self.pageFrame, font=FONT10, text=str(self.curPage), width=8)
         self.pageLabel.grid(row=0, column=1)
-        self.nextButton = Button(self.pageFrame, font=font10, text='다음', command=self.nextPage)
+        self.nextButton = Button(self.pageFrame, font=FONT10, text='다음', command=self.nextPage)
         self.nextButton.grid(row=0, column=2)
 
         return self.pageFrame
@@ -292,8 +289,8 @@ class TkWindow:
         mainScrollbar = Scrollbar(master, orient="vertical")
         mainScrollbar.pack(side="right", fill="y")
         # scrollbar 추가를 위해서 canvas 사용
-        self.interestMainCanvas = Canvas(master, width=width, bg='light salmon',
-                                         scrollregion=(0, 0, 0, 400 * self.numOfPage + 12),
+        self.interestMainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon',
+                                         scrollregion=(0, 0, 0, LIST_VIEW_HEIGHT * self.numOfPage + 12),
                                          yscrollcommand=mainScrollbar.set)
         mainScrollbar.config(command=self.interestMainCanvas.yview)
         self.interestMainCanvas.pack(expand=True, side="top", fill="both")

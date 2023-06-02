@@ -1,0 +1,12 @@
+
+[2023-06-02 11:33:32] Traceback (most recent call last):
+  File "D:/github/3-1/SLangTerm/term/main.py", line 6, in <module>
+    main()
+  File "D:/github/3-1/SLangTerm/term/main.py", line 4, in main
+    TkWindow()
+  File "D:\github\3-1\SLangTerm\term\tkWindow.py", line 63, in __init__
+    self.window.mainloop()
+  File "C:\Python38\lib\tkinter\__init__.py", line 1429, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+
