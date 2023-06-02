@@ -23,6 +23,11 @@ FONT14 = None
 FONT16 = None
 LIST_VIEW_HEIGHT = 220
 
+S_IMAGE_SIZE = 200
+M_IMAGE_SIZE = 250
+L_IMAGE_SIZE = 300
+
+
 # 이름이 라벨일뿐 캔버스로 써도 되고..
 # 이걸 mainFrame 오른쪽 위에 노트북으로 처리하면 될듯
 class SimpleViewCanvas:
@@ -93,7 +98,7 @@ class SimpleViewCanvas:
         imageGet = requests.get(animal.filename, stream=True)
         imageSet = imageGet.content
         img = Image.open(io.BytesIO(imageSet))
-        img = img.resize((200, 200), Image.ANTIALIAS)
+        img = img.resize((S_IMAGE_SIZE, S_IMAGE_SIZE), Image.ANTIALIAS)
 
         if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
             return False
@@ -110,7 +115,7 @@ class SimpleViewCanvas:
         imageGet = requests.get(animal.popfile, stream=True)
         imageSet = imageGet.content
         img = Image.open(io.BytesIO(imageSet))
-        img = img.resize((300, 300), Image.ANTIALIAS)
+        img = img.resize((L_IMAGE_SIZE, L_IMAGE_SIZE), Image.ANTIALIAS)
 
         if ordPage != curPage:  # 위 과정 거친 이후에 이미 다른페이지 와버렸으면 적용하면 안됨. 멀티쓰레딩 문제.
             return False
@@ -127,8 +132,8 @@ class SimpleViewCanvas:
 class ListViewCanvas(SimpleViewCanvas):
     def __init__(self, master, width=0, height=0, x=0, y=0):
         super().__init__(master)
-        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width - 40,
-                             height=height)  # 스크롤바 두께만큼 작게함
+        #(int(self.Window.mainScrollbar['width']))
+        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width - 35, height=height)  # 스크롤바 두께만큼 작게함
         self.master.create_window(x, y, anchor="nw", window=self.canvas)
 
         # X 라벨 배치
@@ -155,6 +160,7 @@ class GridViewCanvas(SimpleViewCanvas):
 class PopUpCanvas(SimpleViewCanvas):
     def __init__(self, master, width=0, height=0, x=0, y=0):
         super().__init__(master)
+        self.animal = Animal()
         self.x = x
         self.y = y
         self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='lightgray', width=width,
@@ -191,14 +197,15 @@ class PopUpCanvas(SimpleViewCanvas):
         pass
 
     def show(self, animal):
-        self.animal = animal
-        self.setContent(self.animal)
+        self.master.create_window(self.x, self.y, anchor="nw", window=self.canvas)
+        if self.animal.isSame(animal):
+            return
+        self.setContent(animal)
         self.clearImage()
         thread1 = Thread(target=lambda: self.setHighImage(self.animal))
         thread1.start()
         thread2 = Thread(target=self.changeMap)
         thread2.start()
-
         #버튼 정하기
         found = False
         for i in range(len(self.Window.interestAnimals)):
@@ -208,7 +215,7 @@ class PopUpCanvas(SimpleViewCanvas):
                 break
         if not found:
             self.addButton.configure(text="관심 목록에 등록", command=self.addInterestAnimals)
-        self.master.create_window(self.x, self.y, anchor="nw", window=self.canvas)
+
 
 
     def setMap(self):
@@ -233,7 +240,7 @@ class PopUpCanvas(SimpleViewCanvas):
             self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
         Thread(target=lambda: canvas.setImage(self.animal)).start()
         self.addButton.configure(text="관심 목록에서 제거")
-        self.addButton.configure(command=lambda: self.removeInterestAnimals(len(self.Window.interestAnimals)-1))
+        self.addButton.configure(command=lambda: self.removeInterestAnimals(0))
         pass
     def removeInterestAnimals(self, i):
         self.Window.interestAnimals.pop(i)

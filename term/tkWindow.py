@@ -51,16 +51,19 @@ class TkWindow:
         self.setCategoriCanvas(self.inquiryCanvas)
         self.setMainCanvas(self.inquiryCanvas)  # selectViewMode Notebook 추가 예정
         self.setPageCanvas(self.inquiryCanvas)
-        #self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
+        self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행
 
         # 관심목록에 관한 실행
         self.setInterestFrame(self.interestCanvas)
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
-        self.popUpCanvas = PopUpCanvas(self.rootCanvas, width=WINDOW_WIDTH * 2 / 3, height=WINDOW_HEIGHT * 0.88, x=WINDOW_WIDTH * 1 / 3 * 0.5, y=WINDOW_HEIGHT * 0.05)
+        self.popUpCanvas = PopUpCanvas(self.rootCanvas, width=WINDOW_WIDTH * 2 / 3, height=WINDOW_HEIGHT * 0.88,
+                                       x=WINDOW_WIDTH * 1 / 3 * 0.5, y=WINDOW_HEIGHT * 0.05)
 
         self.window.mainloop()
+        cef.Shutdown()
+
 
     # tab변경 시 화면 변경
     # 이거를 사용하면 탭 마다 위젯만 추가 제거하는 식으로 실행

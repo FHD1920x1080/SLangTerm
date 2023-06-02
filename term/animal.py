@@ -30,7 +30,9 @@ class Animal:
     pageNo = None  # 페이지 번호
     totalCount = None  # 전체 결과 수
     #무엇을 보관하는게 맞을까, 다 해도 되고
-    def __init__(self, item):
+    def __init__(self, item=None):
+        if item is None:
+            return
         self.filename   = item.findtext("filename")
         self.popfile    = item.findtext("popfile")#popfile이거 주소 보니까 filename 주소에서 _s이거 하나 차이네
         self.kindCd     = item.findtext("kindCd")
