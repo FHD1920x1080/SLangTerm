@@ -105,39 +105,39 @@ class SimpleViewCanvas:
     def clearImage(self):
         self.image.configure(image='')
 
-    def setImage(self, animal, ordPage=0, curPage=0):
+    def setImage(self, animal, ordPage=0, curPage=0, size=S_IMAGE_SIZE):
         if ordPage != curPage:
             return False
-        imageGet = requests.get(animal.filename, stream=True)
-        if ordPage != curPage: # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
-            return False
         try:
+            imageGet = requests.get(animal.filename, stream=True)
+            if ordPage != curPage: # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
+                return False
             imageSet = imageGet.content
             img = Image.open(io.BytesIO(imageSet))
-            img = img.resize((S_IMAGE_SIZE, S_IMAGE_SIZE), Image.ANTIALIAS)
+            img = img.resize((size, size), Image.ANTIALIAS)
             imgTk = ImageTk.PhotoImage(img)
             self.image.configure(image=imgTk)
             self.image.image = imgTk
         except:
-            print("없는 캔버스에 이미지 적용 시도함")
             return False
         return True
 
-    def setHighImage(self, animal, ordPage=0, curPage=0):
+    def setHighImage(self, animal, ordPage=0, curPage=0, size=L_IMAGE_SIZE):
         if ordPage != curPage:
             return False
-        imageGet = requests.get(animal.popfile, stream=True)
-        if ordPage != curPage:  # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
-            return False
         try:
+            imageGet = requests.get(animal.popfile, stream=True)
+            if ordPage != curPage:  # 시간 걸리는 작업이므로 한번더 검사, 멀티쓰레딩이라도 참조이기에 가능한 검사
+                return False
             imageSet = imageGet.content
             img = Image.open(io.BytesIO(imageSet))
-            img = img.resize((L_IMAGE_SIZE, L_IMAGE_SIZE), Image.ANTIALIAS)
+            img = img.resize((size, size), Image.ANTIALIAS)
             imgTk = ImageTk.PhotoImage(img)
             self.image.configure(image=imgTk)
             self.image.image = imgTk
         except:
-            print("없는 캔버스에 이미지 적용 시도함")
+            print("이미지 파일이 너무 큼")
+            self.setHighImage(animal, ordPage=ordPage, curPage=curPage, size=size)
             return False
         return True
 
@@ -208,6 +208,8 @@ class PopUpCanvas(SimpleViewCanvas):
         self.addButton = Button(text="", font=FONT10)
         self.canvas.create_window(330, 130, anchor="nw", window=self.addButton)
 
+        self.image.bind("<Button-1>", lambda event: webOpen(self.animal.popfile))
+
         # 지도용 frame
         map_height = height - 320 + 5  # 왜 5를 더해야 맞는지는 모르겠음
         self.mapFrame = Frame(self.canvas, width=width, height=map_height)
@@ -255,7 +257,6 @@ class PopUpCanvas(SimpleViewCanvas):
         cef.Shutdown()
 
     def changeMap(self):
-
         #여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
         crd = makeGeo(self.animal.careAddr)
         m = folium.Map(location=[crd['lat'], crd['lng']], zoom_start=13)

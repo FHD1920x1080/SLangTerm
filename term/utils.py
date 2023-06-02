@@ -3,7 +3,12 @@ import ctypes
 import webbrowser
 from geopy.geocoders import Nominatim
 #geopy 패키지 설치
+import re
 
+pattern = r"\([^)]*\)"
+def remove_bracket_content(text): # 괄호같은걸로 둘러싸인부분 삭제
+    clean_text = re.sub(pattern, "", text)
+    return clean_text
 
 def get_windows_text_scaling():
     user32 = ctypes.windll.user32

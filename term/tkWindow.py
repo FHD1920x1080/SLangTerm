@@ -190,7 +190,7 @@ class TkWindow:
         ordPage = self.curPage
         while i < curPageCount:
             # 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함, setImage에서 False 반환하도록 수정함
-            if not self.ListViewCanvases[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage):
+            if not self.ListViewCanvases[i].setImage(self.animals[curPageFirstIndex + i], ordPage, self.curPage, size=S_IMAGE_SIZE):
                 # print(i, ordPage, self.curPage)#참조 전달이라 제대로 먹는듯
                 return
             i += 1
