@@ -72,11 +72,16 @@ class TkWindow:
         selectedTab = tab.widget.select()
         currentTab = tab.widget.tab(selectedTab, "text")
         if currentTab == "조회":
+            print("inquiry")
+            self.popUpCanvas.hide()
             pass
         elif currentTab == "등록검색":
-            print("select")
+            print("regiSearch")
+            self.popUpCanvas.hide()
             pass
         elif currentTab == "관심목록":
+            print("interest")
+            self.popUpCanvas.hide()
             pass
 
     def setRoot(self):
@@ -145,7 +150,6 @@ class TkWindow:
         self.prevButton['state'] = 'normal'
         self.nextButton['state'] = 'normal'
         self.printListView()
-        Thread(target=self.loadCurPageThumbnail).start()
 
     def disablePrevNext(self):
         self.prevButton['state'] = 'disable'
@@ -158,6 +162,8 @@ class TkWindow:
         curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         # print(curPageFirstIndex, curPageCount, len(self.animals))
+        thread = Thread(target=self.loadCurPageThumbnail, args=(curPageFirstIndex, curPageCount))
+        thread.start()
         while i < curPageCount:
             self.ListViewCanvases[i].setContent(self.animals[curPageFirstIndex + i])
             self.ListViewCanvases[i].clearImage()  # 일단 이미지 싹 밀어버림
@@ -168,10 +174,8 @@ class TkWindow:
             i += 1
 
     # 두 개의 함수로 나눠서 스레드 사용 after(0, )으로 예약을 걸어둬 실행시키는 방식
-    def loadCurPageThumbnail(self):
+    def loadCurPageThumbnail(self, curPageFirstIndex, curPageCount):
         i = 0  # 라벨 인덱스
-        curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
-        curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         ordPage = self.curPage
         while i < curPageCount:
             # 페이지 빨리 넘기면 이전 쓰레드 남아서 덮어쓰기든 없어야하는데 나오는등 문제 발생함, setImage에서 False 반환하도록 수정함
@@ -204,7 +208,6 @@ class TkWindow:
 
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
-        Thread(target=self.loadCurPageThumbnail).start()
 
     def nextPage(self):
         if self.curPage >= self.lastPage:
@@ -224,7 +227,6 @@ class TkWindow:
 
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
-        Thread(target=self.loadCurPageThumbnail).start()
 
     def setCategoriCanvas(self, master):
         self.categoryFrame = Frame(master)
