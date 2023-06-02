@@ -9,7 +9,7 @@ from PIL import ImageTk, Image
 import requests
 import io
 
-#지도 출력을 위한 모듈
+# 지도 출력을 위한 모듈
 from threading import Thread
 import sys
 import folium
@@ -67,8 +67,10 @@ class SimpleViewCanvas:
     animal = None
 
     Window = None
+
     def __init__(self, master):
         self.master = master
+        self.master_master = master.master
         self.animal = None
 
     def destroy(self):
@@ -76,6 +78,15 @@ class SimpleViewCanvas:
 
     def state(self):
         self.canvas.state()
+
+    def pack(self, side=None):
+        if side is None:
+            self.canvas.pack()
+            return
+        self.canvas.pack(side=side)
+
+    def grid(self, row, column):
+        self.canvas.grid(row=row, column=column)
 
     def clearContent(self):
         self.animal = None
@@ -132,25 +143,34 @@ class SimpleViewCanvas:
 class ListViewCanvas(SimpleViewCanvas):
     def __init__(self, master, width=0, height=0, x=0, y=0):
         super().__init__(master)
-        #(int(self.Window.mainScrollbar['width']))
-        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width - 35, height=height)  # 스크롤바 두께만큼 작게함
-        self.master.create_window(x, y, anchor="nw", window=self.canvas)
+        # (int(self.Window.mainScrollbar['width']))
+        self.canvas = Canvas(master, relief="groove", borderwidth=5, bg='cornsilk1', width=width - 35,
+                             height=height)  # 스크롤바 두께만큼 작게함
+        # self.master.create_window(x, y, anchor="nw", window=self.canvas)
 
         # X 라벨 배치
         self.image = Label(self.canvas, image='')
-        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
         self.kindCd = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(230, 10, anchor="nw", window=self.kindCd)
         self.age = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(230, 40, anchor="nw", window=self.age)
         self.careNm = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(230, 70, anchor="nw", window=self.careNm)
         self.careAddr = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
+        self.canvas.create_window(230, 10, anchor="nw", window=self.kindCd)
+        self.canvas.create_window(230, 40, anchor="nw", window=self.age)
+        self.canvas.create_window(230, 70, anchor="nw", window=self.careNm)
         self.canvas.create_window(230, 100, anchor="nw", window=self.careAddr)
 
-
         # 사진 클릭으로 동물에 대한 자세한 출력
+        self.scrollBind()
         self.image.bind("<Button-1>", lambda event: self.Window.popUpCanvas.show(self.animal))
+
+    def scrollBind(self):
+        self.canvas.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
+        self.image.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
+        self.kindCd.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
+        self.age.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
+        self.careNm.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
+        self.careAddr.bind("<MouseWheel>", lambda event: scroll_canvas(event, self.master_master))
 
 
 class GridViewCanvas(SimpleViewCanvas):
@@ -186,14 +206,15 @@ class PopUpCanvas(SimpleViewCanvas):
         self.addButton = Button(text="", font=FONT10)
         self.canvas.create_window(330, 130, anchor="nw", window=self.addButton)
 
-        #지도용 frame
-        map_height = height - 320 + 5 # 왜 5를 더해야 맞는지는 모르겠음
+        # 지도용 frame
+        map_height = height - 320 + 5  # 왜 5를 더해야 맞는지는 모르겠음
         self.mapFrame = Frame(self.canvas, width=width, height=map_height)
         self.canvas.create_window(5, 320, anchor="nw", window=self.mapFrame)
         thread = Thread(target=self.setMap)
         thread.start()
+
     def hide(self):
-        self.master.create_window(-2000, -2000, anchor="nw", window=self.canvas)# 그냥 이상한데 숨기는거임
+        self.master.create_window(-2000, -2000, anchor="nw", window=self.canvas)  # 그냥 이상한데 숨기는거임
         pass
 
     def show(self, animal):
@@ -206,7 +227,7 @@ class PopUpCanvas(SimpleViewCanvas):
         thread1.start()
         thread2 = Thread(target=self.changeMap)
         thread2.start()
-        #버튼 정하기
+        # 버튼 정하기
         found = False
         for i in range(len(self.Window.interestAnimals)):
             if self.animal.isSame(self.Window.interestAnimals[i]):
@@ -216,8 +237,6 @@ class PopUpCanvas(SimpleViewCanvas):
         if not found:
             self.addButton.configure(text="관심 목록에 등록", command=self.addInterestAnimals)
 
-
-
     def setMap(self):
         sys.excepthook = cef.ExceptHook
         window_info = cef.WindowInfo(self.mapFrame.winfo_id())
@@ -225,37 +244,47 @@ class PopUpCanvas(SimpleViewCanvas):
         cef.Initialize()
         self.browser = cef.CreateBrowserSync(window_info, url="https://www.google.com/")
         cef.MessageLoop()
+        cef.Shutdown()
 
     def changeMap(self):
-        #여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
-        self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/")#sample
+        # 여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
+        self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/")  # sample
         pass
 
     def addInterestAnimals(self):
         self.Window.interestAnimals.insert(0, self.animal)
-        canvas = ListViewCanvas(self.Window.interestMainCanvas, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, x=0, y=0)
+        canvas = ListViewCanvas(self.Window.interestMainFrame, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, x=0, y=0)
+        canvas.grid(row=0, column=0)
         canvas.setContent(self.animal)
         self.Window.interestCanvases.insert(0, canvas)
         for j in range(1, len(self.Window.interestCanvases)):
-            self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
+            self.Window.interestCanvases[j].grid(row=j, column=0)
+            #self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
         Thread(target=lambda: canvas.setImage(self.animal)).start()
         self.addButton.configure(text="관심 목록에서 제거")
         self.addButton.configure(command=lambda: self.removeInterestAnimals(0))
+
+        self.Window.interestMainCanvas.config(scrollregion=self.Window.interestMainCanvas.bbox("all"))
+
         pass
+
     def removeInterestAnimals(self, i):
         self.Window.interestAnimals.pop(i)
         canvas = self.Window.interestCanvases.pop(i)
         canvas.destroy()
-        for j in range(i, len(self.Window.interestCanvases)):
-            self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
+        # for j in range(i, len(self.Window.interestCanvases)):
+        #     self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw",
+        #                                                  window=self.Window.interestCanvases[j].canvas)
         self.addButton.configure(text="관심 목록에 등록")
         self.addButton.configure(command=self.addInterestAnimals)
+
+        self.Window.interestMainCanvas.config(scrollregion=self.Window.interestMainCanvas.bbox("all"))
         pass
 
 
 # 상세 보기 라벨, 이거 자체에 지도를
 class DetaileVeiwCanvas(SimpleViewCanvas):
-    def __init__(self, master, font):
-        super().__init__(master, font)
+    def __init__(self, master):
+        super().__init__(master)
 
     pass

@@ -18,3 +18,13 @@ def webOpen(url):
 
 def bring_to_front(widget):
     widget.lift()
+
+def scroll_canvas(event, canvas):
+    if event.delta > 0:
+        canvas.yview_scroll(-1, "units")
+    else:
+        canvas.yview_scroll(1, "units")
+
+def on_configure(event, canvas):
+    # 스크롤바의 길이를 콘텐츠에 맞게 조절
+    canvas.config(scrollregion=canvas.bbox('all'))

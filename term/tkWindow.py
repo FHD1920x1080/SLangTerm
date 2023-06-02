@@ -4,6 +4,7 @@ from tkinter import font
 from customCanvas import *
 from requestValue import *
 
+
 # 텍스트 배율 가져오기
 class TkWindow:
     def __init__(self):
@@ -15,11 +16,11 @@ class TkWindow:
         FONT12 = font.Font(size=int(12.0 / scaling_factor), family='Helvetica')
         FONT14 = font.Font(size=int(14.0 / scaling_factor), family='Helvetica')
         FONT16 = font.Font(size=int(16.0 / scaling_factor), family='Helvetica')
-        self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+40") # 마지막은 윈도우 시작 위치
+        self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+40")  # 마지막은 윈도우 시작 위치
         self.window.title("타이틀이름")
         self.window.configure(bg='light salmon')
         self.rootCanvas = Canvas(self.window, bg='light salmon')
-        self.rootCanvas.pack( expand=True, fill="both")
+        self.rootCanvas.pack(expand=True, fill="both")
         self.ListViewCanvases = []
         self.animals = []
         self.animalsPrev = []  # 이전 10페이지 분량의 동물들 쓰레드로 읽을것임
@@ -64,7 +65,6 @@ class TkWindow:
         self.window.mainloop()
         cef.Shutdown()
 
-
     # tab변경 시 화면 변경
     # 이거를 사용하면 탭 마다 위젯만 추가 제거하는 식으로 실행
     # 미세한 차이의 성능 저하, 큰 영향 없음
@@ -107,7 +107,7 @@ class TkWindow:
         if not self.setRoot():
             print("읽는데 실패함")
             return
-        if self.animalsPrev: # 읽어오는 사이에 다시 다음으로 넘어가서 animalsPrev에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
+        if self.animalsPrev:  # 읽어오는 사이에 다시 다음으로 넘어가서 animalsPrev에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
             self.animalsPrevReady = True
             return
         for item in self.root.iter("item"):
@@ -125,7 +125,7 @@ class TkWindow:
         if not self.setRoot():
             print("읽는데 실패함")
             return
-        if self.animalsNext: # 읽어오는 사이에 다시 이전으로 돌아가서 animalsNext에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
+        if self.animalsNext:  # 읽어오는 사이에 다시 이전으로 돌아가서 animalsNext에 animals의 값이 복사되어버렸으면. 다음 작업이 덮어쓰기가 되버림
             self.animalsNextReady = True
             return
         for item in self.root.iter("item"):
@@ -140,7 +140,7 @@ class TkWindow:
             self.totalCount = int(item.findtext("totalCount"))  # 총 개수를 받아옴
             self.lastPage = (self.totalCount + self.numOfPage - 1) // self.numOfPage  # 마지막 페이지 정의
         print("검색 기준 마지막 페이지는 ", self.lastPage)
-        Thread(target=self.setAnimalsNext).start() # 다음페이지 애니멀 세팅
+        Thread(target=self.setAnimalsNext).start()  # 다음페이지 애니멀 세팅
         self.pageLabel['text'] = str(self.curPage)
         self.prevButton['state'] = 'normal'
         self.nextButton['state'] = 'normal'
@@ -152,6 +152,8 @@ class TkWindow:
         self.nextButton['state'] = 'disable'
 
     def printListView(self):
+        self.mainScrollbar.set(0, 0)  # 스크롤바의 위치를 맨 위로 설정
+        self.mainCanvas.yview_moveto(0)
         i = 0  # 라벨 인덱스
         curPageFirstIndex = (self.curPage - 1) % 10 * self.numOfPage
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
@@ -196,8 +198,9 @@ class TkWindow:
             self.animalsNext = self.animals.copy()
             self.animalsNextReady = True
             self.animals = self.animalsPrev.copy()
-            #print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
+            # print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
             Thread(target=self.setAnimalsPrev).start()
+
 
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
@@ -216,7 +219,7 @@ class TkWindow:
             self.animalsPrev = self.animals.copy()  # 이동연산을 못하는것이 파이썬의 한계인가...
             self.animalsPrevReady = True
             self.animals = self.animalsNext.copy()
-            #print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
+            # print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
             Thread(target=self.setAnimalsNext).start()
 
         self.pageLabel['text'] = str(self.curPage)
@@ -262,17 +265,18 @@ class TkWindow:
     def setMainCanvas(self, master):
         self.mainScrollbar = Scrollbar(master, orient="vertical")
         self.mainScrollbar.pack(side="right", fill="y")
-        # scrollbar 추가를 위해서 canvas 사용
-        self.mainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon',
-                                 scrollregion=(0, 0, 0, LIST_VIEW_HEIGHT * self.numOfPage + 12),
-                                 yscrollcommand=self.mainScrollbar.set)
-        self.mainScrollbar.config(command=self.mainCanvas.yview)
+        self.mainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon',yscrollcommand=self.mainScrollbar.set)
         self.mainCanvas.pack(expand=True, side="top", fill="both")
-
-        # canvas내에 create_window를 해야 scroll이 가능 일일히 좌표 계산을 해야함
+        self.mainScrollbar.config(command=self.mainCanvas.yview)
+        self.mainFrame = Frame(self.mainCanvas)
+        self.mainCanvas.create_window(0, 0, window=self.mainFrame, anchor='nw')
+        self.mainFrame.bind('<Configure>', lambda event: on_configure(event, self.mainCanvas))
         for i in range(self.numOfPage):
-            label = ListViewCanvas(self.mainCanvas, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, x=0, y=i * LIST_VIEW_HEIGHT)
-            self.ListViewCanvases.append(label)
+            canvas = ListViewCanvas(self.mainFrame, width=WINDOW_WIDTH, height=LIST_VIEW_HEIGHT, y=i * 200)
+            canvas.grid(row=i, column=0)
+            self.ListViewCanvases.append(canvas)
+
+        #self.mainCanvas.config(scrollregion=self.mainCanvas.bbox("all"))
 
         return self.mainCanvas
 
@@ -289,12 +293,13 @@ class TkWindow:
         return self.pageFrame
 
     def setInterestFrame(self, master):
-        mainScrollbar = Scrollbar(master, orient="vertical")
-        mainScrollbar.pack(side="right", fill="y")
-        # scrollbar 추가를 위해서 canvas 사용
-        self.interestMainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon',
-                                         scrollregion=(0, 0, 0, LIST_VIEW_HEIGHT * self.numOfPage + 12),
-                                         yscrollcommand=mainScrollbar.set)
-        mainScrollbar.config(command=self.interestMainCanvas.yview)
+        self.interestMainScrollbar = Scrollbar(master, orient="vertical")
+        self.interestMainScrollbar.pack(side="right", fill="y")
+        self.interestMainCanvas = Canvas(master, width=WINDOW_WIDTH, bg='light salmon', yscrollcommand=self.interestMainScrollbar.set)
         self.interestMainCanvas.pack(expand=True, side="top", fill="both")
+        self.interestMainScrollbar.config(command=self.interestMainCanvas.yview)
+        self.interestMainFrame = Frame(self.interestMainCanvas)
+        self.interestMainCanvas.create_window(0, 0, window=self.interestMainFrame, anchor='nw')
+        self.interestMainFrame.bind('<Configure>', lambda event: on_configure(event, self.interestMainCanvas))
+
         return self.interestMainCanvas
