@@ -15,7 +15,7 @@ class TkWindow:
         FONT12 = font.Font(size=int(12.0 / scaling_factor), family='Helvetica')
         FONT14 = font.Font(size=int(14.0 / scaling_factor), family='Helvetica')
         FONT16 = font.Font(size=int(16.0 / scaling_factor), family='Helvetica')
-        self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+100")
+        self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+40") # 마지막은 윈도우 시작 위치
         self.window.title("타이틀이름")
         self.window.configure(bg='light salmon')
         self.rootCanvas = Canvas(self.window, bg='light salmon')
