@@ -145,7 +145,9 @@ class TkWindow:
             self.totalCount = int(item.findtext("totalCount"))  # 총 개수를 받아옴
             self.lastPage = (self.totalCount + self.numOfPage - 1) // self.numOfPage  # 마지막 페이지 정의
         print("검색 기준 마지막 페이지는 ", self.lastPage)
-        Thread(target=self.setAnimalsNext).start()  # 다음페이지 애니멀 세팅
+        thread = Thread(target=self.setAnimalsNext)  # 다음페이지 애니멀 세팅
+        thread.daemon = True
+        thread.start()
         self.pageLabel['text'] = str(self.curPage)
         self.prevButton['state'] = 'normal'
         self.nextButton['state'] = 'normal'
@@ -163,6 +165,7 @@ class TkWindow:
         curPageCount = min(self.numOfPage, len(self.animals) - curPageFirstIndex)
         # print(curPageFirstIndex, curPageCount, len(self.animals))
         thread = Thread(target=self.loadCurPageThumbnail, args=(curPageFirstIndex, curPageCount))
+        thread.daemon = True
         thread.start()
         while i < curPageCount:
             self.ListViewCanvases[i].setContent(self.animals[curPageFirstIndex + i])
@@ -203,7 +206,9 @@ class TkWindow:
             self.animalsNextReady = True
             self.animals = self.animalsPrev.copy()
             # print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
-            Thread(target=self.setAnimalsPrev).start()
+            thread = Thread(target=self.setAnimalsPrev)
+            thread.daemon = True
+            thread.start()
 
 
         self.pageLabel['text'] = str(self.curPage)
@@ -223,7 +228,9 @@ class TkWindow:
             self.animalsPrevReady = True
             self.animals = self.animalsNext.copy()
             # print(len(self.animalsPrev), len(self.animals), len(self.animalsNext))
-            Thread(target=self.setAnimalsNext).start()
+            thread = Thread(target=self.setAnimalsNext)
+            thread.daemon = True
+            thread.start()
 
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()

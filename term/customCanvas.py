@@ -213,6 +213,7 @@ class PopUpCanvas(SimpleViewCanvas):
         self.mapFrame = Frame(self.canvas, width=width, height=map_height)
         self.canvas.create_window(5, 320, anchor="nw", window=self.mapFrame)
         thread = Thread(target=self.setMap)
+        thread.daemon = True
         thread.start()
 
     def hide(self):
@@ -226,8 +227,10 @@ class PopUpCanvas(SimpleViewCanvas):
         self.setContent(animal)
         self.clearImage()
         thread1 = Thread(target=lambda: self.setHighImage(self.animal))
-        thread1.start()
+        thread1.daemon = True
         thread2 = Thread(target=self.changeMap)
+        thread2.daemon = True
+        thread1.start()
         thread2.start()
         # 버튼 정하기
         found = False
@@ -262,7 +265,9 @@ class PopUpCanvas(SimpleViewCanvas):
         for j in range(1, len(self.Window.interestCanvases)):
             self.Window.interestCanvases[j].grid(row=j, column=0)
             #self.Window.interestMainCanvas.create_window(0, (j) * LIST_VIEW_HEIGHT, anchor="nw", window=self.Window.interestCanvases[j].canvas)
-        Thread(target=lambda: canvas.setImage(self.animal)).start()
+        thread = Thread(target=lambda: canvas.setImage(self.animal))
+        thread.daemon = True
+        thread.start()
         self.addButton.configure(text="관심 목록에서 제거")
         self.addButton.configure(command=lambda: self.removeInterestAnimals(0))
 
