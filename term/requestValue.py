@@ -23,7 +23,6 @@ class RequestValue:
             self.queryParams.pop(key, None) # 없으면 None이 반환되는데 딱히 반환값은 필요 없음
 
     def setParams(self):
-        tempParams = self.queryParams
         self.setParam('bgnde', self.bgnde.get())
         self.setParam('endde', self.endde.get())
         self.setParam('upkind', self.upkind.get())
