@@ -1,6 +1,8 @@
 # 잡스러운 함수들 모아두는 파일
 import ctypes
 import webbrowser
+from geopy.geocoders import Nominatim
+#geopy 패키지 설치
 
 
 def get_windows_text_scaling():
@@ -28,3 +30,25 @@ def scroll_canvas(event, canvas):
 def on_configure(event, canvas):
     # 스크롤바의 길이를 콘텐츠에 맞게 조절
     canvas.config(scrollregion=canvas.bbox('all'))
+
+#주소를 받아 경도,위도로 변환
+def geoCoding(address):
+    geolocoder = Nominatim(user_agent='South Korea', timeout=None)
+    geo = geolocoder.geocode(address)
+    crd = {"lat": str(geo.latitude), "lng": str(geo.longitude)}
+
+    return crd
+
+def makeGeo(address):
+    newaddress = address
+    while True:
+        try:
+            crd = geoCoding(newaddress)
+            if crd is not None:
+                break
+        except Exception as e:
+            words = newaddress.split()
+            newaddress = " ".join(words[:-1])
+            continue
+
+    return crd

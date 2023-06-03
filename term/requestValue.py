@@ -12,6 +12,7 @@ class RequestValue:
         self.endde = StringVar()
         self.upkind = StringVar()
         self.upkind.set(' ') # 라디오박스에 쓸거면 ''같은 빈문자열은 안되고 쓰레기 값이라도 있어야함 그래서 공백 한칸 씀
+        self.careAddr = StringVar()
         self.state = StringVar()
         self.state.set(' ')
 

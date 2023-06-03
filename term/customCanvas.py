@@ -241,14 +241,23 @@ class PopUpCanvas(SimpleViewCanvas):
         sys.excepthook = cef.ExceptHook
         window_info = cef.WindowInfo(self.mapFrame.winfo_id())
         window_info.SetAsChild(self.mapFrame.winfo_id(), [0, 0, self.mapFrame['width'], self.mapFrame['height']])
+        m = folium.Map(location=[37.3402849, 126.7313189], zoom_start=13)
+        folium.Marker([37.3402849, 126.7313189], popup='초기화').add_to(m)
+        m.save('map.html')
         cef.Initialize()
-        self.browser = cef.CreateBrowserSync(window_info, url="https://www.google.com/")
+        self.browser = cef.CreateBrowserSync(window_info, url='file:///map.html')
         cef.MessageLoop()
         cef.Shutdown()
 
     def changeMap(self):
-        # 여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
-        self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/")  # sample
+
+        #여기에 지도 url 또는 html 만들기 코드 추가하면 됨.
+        crd = makeGeo(self.animal.careAddr)
+        m = folium.Map(location=[crd['lat'], crd['lng']], zoom_start=13)
+        folium.Marker([crd['lat'], crd['lng']], popup='보호중').add_to(m)
+        m.save('map.html')
+        self.browser.Reload()
+        #self.browser.GetMainFrame().LoadUrl("https://map.kakao.com/"+crd['lat']+crd['lng'])#sample
         pass
 
     def addInterestAnimals(self):
