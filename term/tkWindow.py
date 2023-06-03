@@ -3,6 +3,8 @@ import tkinter.ttk
 from tkinter import font
 from customCanvas import *
 from requestValue import *
+#graph 관련 모듈
+import time
 
 
 # 텍스트 배율 가져오기
@@ -58,7 +60,13 @@ class TkWindow:
 
         # 관심목록에 관한 실행
         self.setInterestFrame(self.interestCanvas)
+        #동시에 검색을 하게 돼서 스레드로 뺌
+        t=Thread(target=lambda: self.setGraph(self.graphCanvas))
+        t.daemon=True
+        t.start()
+
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
+
         self.popUpCanvas = PopUpCanvas(self.rootCanvas, width=WINDOW_WIDTH * 2 / 3, height=WINDOW_HEIGHT * 0.88,
                                        x=WINDOW_WIDTH * 1 / 3 * 0.5, y=WINDOW_HEIGHT * 0.05)
 
@@ -235,6 +243,26 @@ class TkWindow:
         self.pageLabel['text'] = str(self.curPage)
         self.printListView()
 
+    def setGraph(self, Canvas):
+        now = time
+        nowYear = now.localtime().tm_year
+        nowMonth = now.localtime().tm_mon
+        nowMday = now.localtime().tm_mday
+        bar_width = 60
+        x_gap = 30
+        x0 = 60
+        y0 = 300
+        max_level = 3000
+        for i in range(12):
+            nowBgnde = makeCalendarStr(nowYear,nowMonth,nowMday,i+1)
+            nowEndde = makeCalendarStr(nowYear,nowMonth,nowMday,i)
+            total = getTotal(nowBgnde,nowEndde)
+            x1 = x0 + i * (bar_width + x_gap)
+            y1 = y0 - 60 * total//max_level
+            Canvas.create_rectangle(x1, y1, x1 + bar_width, y0, fill='peach puff')
+            Canvas.create_text(x1, y0 + 5, text=str(nowEndde), anchor='n')
+            Canvas.create_text(x1 + int(bar_width//2), y1 - 10, text=str(total), anchor='s')
+
     def setCategoriCanvas(self, master):
         self.categoryFrame = Frame(master)
         self.categoryFrame.pack()
@@ -310,5 +338,8 @@ class TkWindow:
         self.interestMainFrame = Frame(self.interestMainCanvas)
         self.interestMainCanvas.create_window(0, 0, window=self.interestMainFrame, anchor='nw')
         self.interestMainFrame.bind('<Configure>', lambda event: on_configure(event, self.interestMainCanvas))
+
+        self.graphCanvas = Canvas(master,width=WINDOW_WIDTH,height=200, bg='light salmon')
+        self.graphCanvas.pack(expand=True, side="bottom",fill="both")
 
         return self.interestMainCanvas

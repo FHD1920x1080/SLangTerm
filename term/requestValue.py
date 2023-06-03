@@ -1,4 +1,5 @@
 from tkinter import StringVar
+import xml.etree.ElementTree as ET
 import requests
 url = 'http://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic'
 service_key = "Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH/SYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8+SgQ=="
@@ -36,3 +37,11 @@ class RequestValue:
     def getValue(self):
         return requests.get(url, params=self.queryParams)
 
+#오직 그래프를 위한 totalcount 구하기
+#numOfRows가 1개부터 검색가능 totalcount는 제대로 나옴
+def getTotal(bgnde,endde):
+    params = {'serviceKey': service_key,'bgnde':str(bgnde),'endde':str(endde), 'numOfRows': str(1), 'pageNo': str(1)}
+    response = requests.get(url,params=params)
+    root = ET.fromstring(response.content)
+    totalCount = root.find("body").find("totalCount").text
+    return int(totalCount)

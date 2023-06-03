@@ -297,7 +297,6 @@ class PopUpCanvas(SimpleViewCanvas):
         self.Window.interestMainCanvas.config(scrollregion=self.Window.interestMainCanvas.bbox("all"))
         pass
 
-
 # 상세 보기 라벨, 이거 자체에 지도를
 class DetaileVeiwCanvas(SimpleViewCanvas):
     def __init__(self, master):

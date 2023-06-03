@@ -46,9 +46,23 @@ def makeGeo(address):
             crd = geoCoding(newaddress)
             if crd is not None:
                 break
-        except Exception as e:
+        except:
             words = newaddress.split()
             newaddress = " ".join(words[:-1])
             continue
 
     return crd
+
+def makeCalendarStr(nowYear,nowMonth,nowMday,i):
+    newNowYear = nowYear
+    newNowMonth = nowMonth-i
+    newNowMday = nowMday
+    if newNowMonth<=0:
+        newNowYear -= 1
+        newNowMonth = 12+newNowMonth
+    if newNowMonth<10:
+        newNowMonth='0'+str(newNowMonth)
+    if newNowMday<10:
+        newNowMday='0'+str(newNowMday)
+    return str(newNowYear)+str(newNowMonth)+str(newNowMday)
+
