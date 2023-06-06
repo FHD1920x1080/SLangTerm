@@ -6,6 +6,9 @@ from requestValue import *
 #graph 관련 모듈
 import time
 
+#c연동
+import average
+
 
 # 텍스트 배율 가져오기
 class TkWindow:
@@ -57,13 +60,13 @@ class TkWindow:
         self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행
-
+        self.setSearchFrame(self.regiSearchCanvas)
+        t = Thread(target=lambda: self.setGraph(self.graphCanvas))
+        t.daemon = True
+        t.start()
         # 관심목록에 관한 실행
         self.setInterestFrame(self.interestCanvas)
         #동시에 검색을 하게 돼서 스레드로 뺌
-        t=Thread(target=lambda: self.setGraph(self.graphCanvas))
-        t.daemon=True
-        t.start()
 
         # 상세보기 탭에 들어갈 프레임 껍데기 만들어줘야함
 
@@ -253,16 +256,19 @@ class TkWindow:
         x0 = 60
         y0 = 300
         max_level = 3000
+        totalList = []
         for i in range(12):
             nowBgnde = makeCalendarStr(nowYear,nowMonth,nowMday,i+1)
             nowEndde = makeCalendarStr(nowYear,nowMonth,nowMday,i)
-            total = getTotal(nowBgnde,nowEndde)
+            totalList.append(getTotal(nowBgnde,nowEndde))
             x1 = x0 + i * (bar_width + x_gap)
-            y1 = y0 - 60 * total//max_level
+            y1 = y0 - 60 * totalList[i]//max_level
             Canvas.create_rectangle(x1, y1, x1 + bar_width, y0, fill='peach puff')
             Canvas.create_text(x1, y0 + 5, text=str(nowEndde), anchor='n')
-            Canvas.create_text(x1 + int(bar_width//2), y1 - 10, text=str(total), anchor='s')
-
+            Canvas.create_text(x1 + int(bar_width//2), y1 - 10, text=str(totalList[i]), anchor='s')
+        totalaver = average.average(totalList)
+        Canvas.create_text(600, 0, text='월 단위 유기동물 수', fill='cyan',font=FONT14, anchor='n')
+        Canvas.create_text(600, 20, text='평균 : '+str(int(totalaver)), fill='cyan',font=FONT14, anchor='n')
     def setCategoriCanvas(self, master):
         self.categoryFrame = Frame(master)
         self.categoryFrame.pack()
@@ -329,6 +335,14 @@ class TkWindow:
 
         return self.pageFrame
 
+    def setSearchFrame(self, master):
+        self.SearchMainCanvas = Canvas(master, width=WINDOW_WIDTH ,bg='light salmon')
+        self.SearchMainCanvas.pack(expand=True, side="top", fill="both")
+
+        self.graphCanvas = Canvas(master,width=WINDOW_WIDTH, bg='light salmon')
+        self.graphCanvas.pack(expand=True, side="top",fill="both")
+        return self.SearchMainCanvas
+
     def setInterestFrame(self, master):
         self.interestMainScrollbar = Scrollbar(master, orient="vertical")
         self.interestMainScrollbar.pack(side="right", fill="y")
@@ -338,8 +352,5 @@ class TkWindow:
         self.interestMainFrame = Frame(self.interestMainCanvas)
         self.interestMainCanvas.create_window(0, 0, window=self.interestMainFrame, anchor='nw')
         self.interestMainFrame.bind('<Configure>', lambda event: on_configure(event, self.interestMainCanvas))
-
-        self.graphCanvas = Canvas(master,width=WINDOW_WIDTH,height=200, bg='light salmon')
-        self.graphCanvas.pack(expand=True, side="bottom",fill="both")
 
         return self.interestMainCanvas
