@@ -23,7 +23,6 @@ TOKEN ='토큰필요'
 baseurl = 'https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic?serviceKey=Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH%2FSYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8%2BSgQ%3D%3D'
 
 bot = telepot.Bot(TOKEN)
-
 def getData(bgn_param,end_param):
     url = baseurl+'&bgnde='+bgn_param+'&endde='+end_param+'&pageNo=1&numOfRows=10'
     response = requests.get(url)
@@ -78,7 +77,9 @@ if __name__=='__main__':
     current_month = today.strftime('%Y%m')
 
     print( '[',today,']received token :', TOKEN )
-
-    pprint( bot.getMe() )
+    try:
+        pprint( bot.getMe() )
+    except:
+        print("정상적인 토큰이 아닙니다.")
 
     run(current_month)

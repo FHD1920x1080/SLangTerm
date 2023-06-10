@@ -79,7 +79,13 @@ current_month = today.strftime('%Y%m')
 
 print( '[',today,']received token :', noti.TOKEN )
 
-bot = telepot.Bot(noti.TOKEN)
-pprint( bot.getMe() )
 
-print('Listening...')
+def message_loop():
+    bot = telepot.Bot(noti.TOKEN)
+    try:
+        pprint( bot.getMe() )
+    except:
+        print("정상적인 토큰이 아닙니다.")
+        return
+    bot.message_loop(handle)
+    print('Listening...')
