@@ -22,7 +22,7 @@ class TkWindow:
         FONT14 = font.Font(size=int(14.0 / scaling_factor), family='Helvetica')
         FONT16 = font.Font(size=int(16.0 / scaling_factor), family='Helvetica')
         self.window.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT) + "+100+40")  # 마지막은 윈도우 시작 위치
-        self.window.title("타이틀이름")
+        self.window.title("BohoBada")
         self.window.configure(bg='light salmon')
         self.rootCanvas = Canvas(self.window, bg='light salmon')
         self.rootCanvas.pack(expand=True, fill="both")
@@ -40,6 +40,9 @@ class TkWindow:
         self.curPage = 1
         self.lastPage = 1
         self.rqValue = RequestValue(self.numOfPage)  # 페이지의 10배만큼 읽음.
+        self.Searchdog_reg_no = StringVar() #등록 검색
+        self.Searchowner_birth = StringVar()
+        self.SearchResult = []
 
         self.TabBar = tkinter.ttk.Notebook(self.rootCanvas)
         self.TabBar.pack(side="top", expand=True, fill="both")
@@ -60,6 +63,7 @@ class TkWindow:
         self.setAndPrint()  # 이걸 init에서 해줘야 초기에 값이 나오는데 프로그램 실행이 느려짐
 
         # 등록검색에 관한 실행
+        #self.setSearchCanvas(self.regiSearchCanvas)
         self.setSearchFrame(self.regiSearchCanvas)
         t = Thread(target=lambda: self.setGraph(self.graphCanvas))
         t.daemon = True
@@ -339,7 +343,28 @@ class TkWindow:
         self.SearchMainCanvas = Canvas(master, width=WINDOW_WIDTH ,bg='light salmon')
         self.SearchMainCanvas.pack(expand=True, side="top", fill="both")
 
-        self.graphCanvas = Canvas(master,width=WINDOW_WIDTH, bg='light salmon')
+        row_count = 0
+        Label(self.SearchMainCanvas, font=FONT10, text='동물등록번호', width=10).place(
+            x=300,y=30)
+        Entry(self.SearchMainCanvas, font=FONT10, textvariable=self.Searchdog_reg_no, justify=RIGHT, width=20).place(
+            x=390, y=30)
+        Label(self.SearchMainCanvas, font=FONT10, text='소유자 생년월일', width=13).place(
+            x=550, y=30)
+        Entry(self.SearchMainCanvas, font=FONT10, textvariable=self.Searchowner_birth, justify=RIGHT, width=20).place(
+            x=670, y=30)
+
+        for i in range(5):
+            self.SearchResult.append(Label(self.SearchMainCanvas, font=FONT16, text='', width=50,bg='peach puff'))
+
+        self.setAndPrintButton = Button(self.SearchMainCanvas, font=FONT10, text='검색',
+                                        command=lambda: setSearchRq(self.Searchdog_reg_no, self.Searchowner_birth,self.SearchResult))
+        self.setAndPrintButton.place(x=870, y=30)
+        row_count += 1
+
+        for i in range(5):
+            self.SearchResult[i].place(x=300, y=70+i*45)
+
+        self.graphCanvas = Canvas(master,width=WINDOW_WIDTH,bg='light salmon')
         self.graphCanvas.pack(expand=True, side="top",fill="both")
         return self.SearchMainCanvas
 

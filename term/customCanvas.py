@@ -92,15 +92,19 @@ class SimpleViewCanvas:
         self.animal = None
         self.kindCd['text'] = ''
         self.age['text'] = ''
+        self.specialMark['text'] = ''
         self.careNm['text'] = ''
         self.careAddr['text'] = ''
+        self.careTel['text'] = ''
 
     def setContent(self, animal):
         self.animal = animal
         self.kindCd['text'] = animal.kindCd
         self.age['text'] = animal.age
+        self.specialMark['text'] = animal.specialMark
         self.careNm['text'] = animal.careNm
         self.careAddr['text'] = animal.careAddr
+        self.careTel['text'] = animal.careTel
 
     def clearImage(self):
         self.image.configure(image='')
@@ -154,13 +158,17 @@ class ListViewCanvas(SimpleViewCanvas):
         self.image = Label(self.canvas, image='')
         self.kindCd = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
         self.age = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.specialMark = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
         self.careNm = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
         self.careAddr = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.careTel = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
         self.canvas.create_window(10, 10, anchor="nw", window=self.image)
         self.canvas.create_window(230, 10, anchor="nw", window=self.kindCd)
         self.canvas.create_window(230, 40, anchor="nw", window=self.age)
-        self.canvas.create_window(230, 70, anchor="nw", window=self.careNm)
-        self.canvas.create_window(230, 100, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(230, 70, anchor="nw", window=self.specialMark)
+        self.canvas.create_window(230, 100, anchor="nw", window=self.careNm)
+        self.canvas.create_window(230, 130, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(230, 160, anchor="nw", window=self.careTel)
 
         # 사진 클릭으로 동물에 대한 자세한 출력
         self.scrollBind()
@@ -194,19 +202,23 @@ class PopUpCanvas(SimpleViewCanvas):
 
         # X 라벨 배치
         self.image = Label(self.canvas, image='')
-        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
         self.kindCd = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(330, 10, anchor="nw", window=self.kindCd)
         self.age = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(330, 40, anchor="nw", window=self.age)
+        self.specialMark = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
         self.careNm = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(330, 70, anchor="nw", window=self.careNm)
         self.careAddr = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
-        self.canvas.create_window(330, 100, anchor="nw", window=self.careAddr)
+        self.careTel = Label(self.canvas, font=FONT10, text='', height=1, bg='cyan')
+        self.canvas.create_window(10, 10, anchor="nw", window=self.image)
+        self.canvas.create_window(330, 10, anchor="nw", window=self.kindCd)
+        self.canvas.create_window(330, 40, anchor="nw", window=self.age)
+        self.canvas.create_window(330, 70, anchor="nw", window=self.specialMark)
+        self.canvas.create_window(330, 100, anchor="nw", window=self.careNm)
+        self.canvas.create_window(330, 130, anchor="nw", window=self.careAddr)
+        self.canvas.create_window(330, 160, anchor="nw", window=self.careTel)
 
         # 목록 추가 제거 버튼
         self.addButton = Button(text="", font=FONT10)
-        self.canvas.create_window(330, 130, anchor="nw", window=self.addButton)
+        self.canvas.create_window(330, 200, anchor="nw", window=self.addButton)
 
         self.image.bind("<Button-1>", lambda event: webOpen(self.animal.popfile))
 
@@ -299,7 +311,7 @@ class PopUpCanvas(SimpleViewCanvas):
         pass
 
 # 상세 보기 라벨, 이거 자체에 지도를
-class DetaileVeiwCanvas(SimpleViewCanvas):
+class DetaileVeiwCanvas(SimpleViewCanvas): # 결국 귀찮아서 안만들었다고 한다...
     def __init__(self, master):
         super().__init__(master)
 

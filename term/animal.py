@@ -37,14 +37,16 @@ class Animal:
         self.popfile    = item.findtext("popfile")#popfile이거 주소 보니까 filename 주소에서 _s이거 하나 차이네
         self.kindCd     = item.findtext("kindCd")
         self.age        = item.findtext("age")
+        self.specialMark = item.findtext("specialMark")
         self.careNm     = item.findtext("careNm")
         self.careAddr   = item.findtext("careAddr")
+        self.careTel = item.findtext("careTel")
 
     def getPopfile(self):
         return self.filename[:-6]+".jpg" # 이렇게 해도 되는줄 알았는데 어떤건 jepg로 다름 ㅋㅋ
 
     def getSimpleData(self):
-        return self.kindCd + "   " + self.age + "   " + self.careNm + "   " + self.careAddr
+        return self.kindCd + " / " + self.age + "\n" + self.specialMark + "\n"+ self.careNm + "\n" + self.careAddr + "\n"  + self.careTel + "\n" + self.filename +"\n"
 
     def isSame(self, animal):
         if self is animal:

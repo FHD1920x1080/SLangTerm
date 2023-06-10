@@ -3,6 +3,9 @@ import xml.etree.ElementTree as ET
 import requests
 url = 'http://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic'
 service_key = "Bst8DsrxQ7RorD2aw2vb4FGO7mfU4MQ7yrH/SYzAN6hYr5OaDJZDV4fYUgUjGtexpTALuChYvNgqV5Uhc8+SgQ=="
+
+url1 = 'https://apis.data.go.kr/1543061/animalInfoSrvc/animalInfo'
+service_key1 = "EqR/QnVxnMELK13ieeIC/IHSz6q2ANxJLi5IJCtyGR2mw1149RbLOOSa9IyzAxsma4H66LwRumQEV26v8JYlqw=="
 class RequestValue:
     def __init__(self, numOfPage):
         self.numOfRows = 10 * numOfPage
@@ -44,3 +47,25 @@ def getTotal(bgnde,endde):
     root = ET.fromstring(response.content)
     totalCount = root.find("body").find("totalCount").text
     return int(totalCount)
+
+
+def setSearchRq(rfid, name, result):
+    print(rfid.get(), name.get())
+    for i in range(5):
+        result[i].configure(text="")
+    if rfid and name:
+        params = {'serviceKey': service_key1, 'dog_reg_no': str(rfid.get()), 'owner_birth': str(name.get())}
+        print(params)
+        response = requests.get(url1,params=params)
+        root = ET.fromstring(response.content)
+        if root.find("body").find("item"):
+            result[0].configure(text="등록번호 : "+root.find("body").find("item").find("dogRegNo").text)
+            result[1].configure(text="이름 : "+root.find("body").find("item").find("dogNm").text)
+            result[2].configure(text="성별 : "+root.find("body").find("item").find("sexNm").text)
+            result[3].configure(text="품종 : "+root.find("body").find("item").find("kindNm").text)
+            result[4].configure(text="중성화 여부 : "+root.find("body").find("item").find("neuterYn").text)
+        else:
+            result[0].configure(text="없는 결과입니다.")
+    else:
+        result[0].configure(text="빈칸을 채워주세요.")
+
